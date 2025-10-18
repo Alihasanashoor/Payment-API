@@ -43,8 +43,8 @@ $headerKey =
     $headers['idempotency-key'] ??
     $headers['IDEMPOTENCY-KEY'] ?? null;
 
-if (empty($data['idempotency_key']) && $headerKey) {
-    $data['idempotency_key'] = $headerKey;
+if (empty($body['idempotency_key']) && $headerKey) {
+    $body['idempotency_key'] = $headerKey;
 }
 //Ensure all required fields are present in the request.
 //If any are missing, Validator::required() will stop and return HTTP 422.
@@ -52,6 +52,7 @@ Validator::required($body,['card_id', 'Amount_taken','product','idempotency_key'
 
 //Ensure the `amount` field is a positive number.
 Validator::positiveAmount($body['Amount_taken']);
+//ensure that indempotency_key exists, also enforces a max length (64 chars)
 Validator::idempotencyKey($body['idempotency_key']);
 
 

@@ -19,7 +19,6 @@ final class TransactionService{
      * withdraw()
      * ----------
      * @param int         $cardId      -> Card to withdraw from (Card_ID column)
-     * @param float       $balance      -> Amount of money to take
      * @param string      $product     -> Course ID (stored in Product column)
      * @param string      $idemKey     -> Idempotency_Key (prevents double charging)
      * @param string      $Amount_taken -> the money taken from the account

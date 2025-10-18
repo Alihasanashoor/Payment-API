@@ -27,10 +27,7 @@ if ($result === null || empty($result['card_id'])) {
     exit;
 }
 
-//handle "not found" return HTTP 404
-if($result == null){
-    Json::error(404, 'not found for this link_id');
-}
+
 
 //if Success return HTTP 200 OK with normalized JSON payload.
 
