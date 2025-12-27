@@ -1,0 +1,9 @@
+# Environment variables (secrets)
+.env
+
+# Composer dependencies
+/vendor/
+
+# Logs & cache
+*.log
+/cache/

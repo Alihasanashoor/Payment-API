@@ -1,0 +1,17 @@
+this is a payment API that is connected to MYSQL database.
+
+this API ensures data consistency and prevents partial operations. Idempotency keys are used to ensure money doesn't double withdraw.
+in database there is tiggers that will set the new balance with money is withdraw or send, and set the status to success and the type is 
+deposit or withdraw but in this api it will always be withdraw.
+
+index used in here to resolve user id and joins was used to get the information that is scattered around other tables.
+
+ACID also was used:
+Everything succeeds or everything fails & Data must always follow valid rules balance that is have less the the stock price will not succeed & Two transactions should not affect each other’s results & Once committed, data will not disappear even if server crashes.
+
+SQL join was used to return:
+	    'account_id', 'card_id', 'balance', 'link_id'.
+
+distributed system is also is there this API is connected to a website for payment acting as service 2. They communicate through HTTP requests
+
+
