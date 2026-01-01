@@ -9,7 +9,7 @@ final class database{
     // Hold a single PDO connection for the whole request
     private static ?PDO $pdo=null;
 
-    public static function pdo(){ 
+    public static function pdo(): PDO{ 
         //Reuse if already created
         if(self::$pdo) return self::$pdo;
         
@@ -34,7 +34,18 @@ final class database{
             self::$pdo = new PDO($dsn, $user, $pass, $opt);
             return self::$pdo;
         } catch(PDOException $e){
-            Json::error(500, 'DB connection failed', ['details' => $e->getMessage()]);
+            /**
+            * APP_ENV controls how much information we expose.
+            *
+            * - dev  → show detailed error (for debugging)
+            * - prod → hide internals (security)
+            */
+            $env = getenv('APP_ENV')?: 'prod';
+            if($env == 'dev'){
+                Json::error(500, 'DB connection failed', ['details' => $e->getMessage()]);
+            }
+            // Production-safe error
+            Json::error(500, 'Service temporarily unavailable');
     }
 }
 

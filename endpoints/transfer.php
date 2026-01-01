@@ -1,11 +1,15 @@
 <?php
 declare(strict_types=1);
 
+use App\Auth;
 use App\Validator;
 use App\Json;
 use App\TransactionService;
 use App\Repository\CardRepository;
 use App\Util\mask;
+
+// Enforce API key authentication for this request
+Auth::requireApiKey();
 
 
 
