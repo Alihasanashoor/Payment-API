@@ -87,7 +87,6 @@ if($method =='GET' && $path=='/v1/students/resolve'){
  * - Idempotency protection
  * - Database triggers for balance updates
  */
-
 if($method == 'POST' && $path =='/v1/transactions/withdraw'){
     require __DIR__ . '/../endpoints/AcademicRegistrationSystem_Withdraw.php';
     exit;
