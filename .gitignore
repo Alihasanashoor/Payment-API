@@ -7,3 +7,6 @@
 # Logs & cache
 *.log
 /cache/
+
+# db connection file test
+test_db.php

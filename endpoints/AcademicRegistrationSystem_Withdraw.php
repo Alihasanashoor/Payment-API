@@ -7,7 +7,7 @@ use App\Json;
 use App\TransactionServiceV1;
 
 // Enforce API key authentication for this request
-//Auth::requireApiKey();
+Auth::requireApiKey();
 
 //This endpoint handles withdrawal transactions.
 
@@ -51,17 +51,17 @@ if (empty($body['idempotency_key']) && $headerKey) {
 }
 //Ensure all required fields are present in the request.
 //If any are missing, Validator::required() will stop and return HTTP 422.
-Validator::required($body,['card_id', 'Amount_taken','product','idempotency_key']);
+Validator::required($body,['card_id', 'Amount','product','idempotency_key']);
 
 //Ensure the `amount` field is a positive number.
-Validator::positiveAmount($body['Amount_taken']);
+Validator::positiveAmount($body['Amount']);
 //ensure that indempotency_key exists, also enforces a max length (64 chars)
 Validator::idempotencyKey($body['idempotency_key']);
 
 
 //Cast each field into the correct PHP type for safety.
 $cardId= (int)$body['card_id'];
-$amount= (float) $body['Amount_taken'];
+$amount= (float) $body['Amount'];
 $product= (string) $body['product'];
 $idemkey= (string) $body['idempotency_key'];
 

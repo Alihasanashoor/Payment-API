@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App;
 use App\Json;
 use App\Database;
+use PDO;
 
 /**
  * Auth
@@ -30,6 +31,8 @@ final class Auth{
     *
     * @return array The authenticated API key record (identity)
     */
+
+    private const RATE_LIMIT =60;
     public static function requireApiKey(): array{
         /**
         * Read API key from HTTP headers.
@@ -100,6 +103,8 @@ final class Auth{
         if(!$apikey){
             Json::error(401, 'Invalid or expired API key');
         }
+        // Enforce rate limit (per API key, per minute)
+        self::enforceRateLimit($pdo, (int)$apikey['id']);
 
         /**
         * Return the authenticated identity.
@@ -117,6 +122,59 @@ final class Auth{
 
 
     }
+
+    /**
+    * Enforce per-minute rate limiting for a specific API key.
+    *
+    * @param PDO $pdo
+    * @param int $apiKeyId
+    */
+    private static function enforceRateLimit(PDO $pdo, int $apikeyID){
+        /**
+         * Compute the start of the current minute window.
+         *
+         * Example:
+         *   14:30:22 → 14:30:00
+         *
+         * All requests in the same minute share the same window_start.
+        */
+        $windowStart = date('y-m-d H:i:00');
+
+        /**
+         * Insert or update the request counter atomically.
+         *
+         * Thanks to the PRIMARY KEY (api_key_id, window_start):
+         * - First request inserts a new row (count = 1)
+         * - Subsequent requests increment request_count
+        */
+        $stmt = $pdo->prepare(
+            'INSERT INTO api_rate_limits (api_key_id, window_start, request_count)
+            VALUES (?,?,1)
+            ON DUPLICATE KEY UPDATE
+                request_count = request_count+1'
+            );
+        $stmt->execute([$apikeyID, $windowStart]);
+
+        /**
+         * Fetch the updated request count for this window.
+        */
+        $stmt= $pdo->prepare(
+            'SELECT request_count
+            FROM api_rate_limits
+            WHERE api_key_id = ?
+            AND window_start = ?
+            ');
+        $stmt->execute([$apikeyID, $windowStart]);
+
+        $count=(int)$stmt->fetchColumn();
+
+        if($count > SELF::RATE_LIMIT){
+            Json::error(429, 'Too many requests, please try again later');
+        }
+        
+
+    }
+
 }
 
 ?>

@@ -88,7 +88,7 @@ final class TransactionServiceV1{
                     *• Balance_After calculation
                 */
                 $insert=$pdo->prepare(' INSERT INTO `transaction`
-                (`Card_ID`, `Product`, `Amount_taken`, `type`, `Idempotency_Key`)
+                (`Card_ID`, `Product`, `Amount`, `type`, `Idempotency_Key`)
                 VALUES (?, ?, ?, "withdraw", ?)');
                 $insert->execute([$cardId, $product,$Amount_taken, $idemkey]);
 
@@ -124,7 +124,7 @@ final class TransactionServiceV1{
                     'status'           =>$row['status'],
                     'card_id'          =>(int)$row['Card_ID'],
                     'type'             =>$row['type'],
-                    'Amount_taken'     =>(float)$row['Amount_taken'],
+                    'Amount_taken'     =>(float)$row['Amount'],
                     'Balance_After'    =>(float)$row['Balance_After'],
                     'Product'          =>$row['Product'],
                     'Transaction_ID'   =>$row['Transaction_ID'],

@@ -34,7 +34,7 @@ final class CardRepository{
             * Prepare a parameterized query to prevent SQL injection.
             * LIMIT 1 ensures minimal data retrieval and better performance.
         */
-        $search= $pdo->prepare('SELECT Card_ID FROM Card WHERE iban =? LIMIT 1');
+        $search= $pdo->prepare('SELECT Card_ID FROM `card` WHERE iban =? LIMIT 1');
 
         // Execute query with the provided IBAN
         $search->execute([$iban]);
