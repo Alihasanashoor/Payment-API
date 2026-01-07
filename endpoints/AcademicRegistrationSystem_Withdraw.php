@@ -6,8 +6,6 @@ use App\Validator;
 use App\Json;
 use App\TransactionServiceV1;
 
-// Enforce API key authentication for this request
-Auth::requireApiKey();
 
 //This endpoint handles withdrawal transactions.
 

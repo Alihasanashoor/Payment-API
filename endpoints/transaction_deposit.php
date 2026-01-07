@@ -7,8 +7,7 @@ use App\Validator;
 use App\Json;
 use App\TransactionService;
 
-// Enforce API key authentication for this request
-Auth::requireApiKey();
+
 
 /**
  * POST /v1/transactions/deposit

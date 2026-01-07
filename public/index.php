@@ -29,7 +29,12 @@ require_once __DIR__ . '/../src/Service/AccountService.php';
 require_once __DIR__ . '/../src/Service/TransactionServiceV1.php';
 
 use App\Json;
-use App\Auth;
+use App\Core\Kernel;
+use App\Core\AuthMiddleware;
+
+// Register middleware
+Kernel::add(new AuthMiddleware());
+
 
 
 
@@ -64,6 +69,11 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 if($method=='GET' && $path=='/v1/ping'){
     Json::ok(200,['ok'=> true,'service' => 'payment-api']);
 }
+
+// Run middleware BEFORE routing
+Kernel::run();
+
+
 /**
  * STUDENT RESOLUTION
  * ------------------

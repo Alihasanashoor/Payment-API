@@ -8,8 +8,6 @@ use App\TransactionService;
 use App\Repository\CardRepository;
 use App\Util\mask;
 
-// Enforce API key authentication for this request
-Auth::requireApiKey();
 
 
 

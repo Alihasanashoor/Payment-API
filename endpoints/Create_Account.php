@@ -5,8 +5,7 @@ use App\Validator;
 use App\Json;
 use App\Account;
 
-// Enforce API key authentication for this request
-Auth::requireApiKey();
+
 
 //This endpoint handles new account creation
 

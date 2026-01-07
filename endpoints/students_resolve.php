@@ -4,8 +4,7 @@ use App\Auth;
 use App\Json;
 use App\StudentService;
 
-// Enforce API key authentication for this request
-Auth::requireApiKey();
+
 
 //PURPOSE: Fetch a student’s account + card info by their numeric Link_ID.
 
