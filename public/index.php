@@ -67,7 +67,7 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
  */
 
 if($method=='GET' && $path=='/v1/ping'){
-    Json::ok(200,['ok'=> true,'service' => 'payment-api']);
+    Json::ok(200,['status'=> true,'service' => 'payment-api']);
 }
 
 // Run middleware BEFORE routing

@@ -14,12 +14,12 @@ final class database{
         if(self::$pdo) return self::$pdo;
         
         //Read from environment (loaded by env.php)
-        $host = getenv('DB_HOST') ?: '127.0.0.1';
-        $port = getenv('DB_PORT') ?: '3306';
-        $db = getenv('DB_NAME') ?: 'payment_systemdb';
-        $user = getenv('DB_USER')?: 'payuser';
-        $pass = getenv('DB_PASS')?: 'Alihasanashoor2@@@';
-        $charset = getenv('DB_CHARSET') ?: 'utf8mb4';
+        $host = getenv('DB_HOST');
+        $port = getenv('DB_PORT');
+        $db = getenv('DB_NAME');
+        $user = getenv('DB_USER');
+        $pass = getenv('DB_PASS');
+        $charset = getenv('DB_CHARSET');
 
         //DSN tells PDO how to connect to MySQL/MariaDB
         $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
