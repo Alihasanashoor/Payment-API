@@ -1,9 +1,6 @@
-import requests
 
-BASE_URL = "http://localhost:8000"
-
-def test_api_health():
-    response = requests.get(f"{BASE_URL}/v1/ping")
+def test_api_health(client):
+    response = client.get(client.base_url +"/v1/ping" )
 
     # HTTP status must be 200
     assert response.status_code == 200
