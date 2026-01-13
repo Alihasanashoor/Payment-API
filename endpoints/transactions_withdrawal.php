@@ -45,11 +45,13 @@ $headers = function_exists('getallheaders') ? getallheaders() : [];
 //If any are missing, Validator::required() will stop and return HTTP 422.
 Validator::required($body,['card_id', 'Amount','product','idempotency_key']);
 
-//Ensure the `amount` field is a positive number.
-
+// Ensure the `amount` field is a positive number.
 Validator::positiveAmount($body['Amount']);
-//ensure that indempotency_key exists, also enforces a max length (64 chars)
+// Ensure that indempotency_key exists, also enforces a max length (64 chars)
 Validator::idempotencyKey($body['idempotency_key']);
+
+// Ensure that card_id is int 
+Validator::requireInt('card_id', $body['card_id']);
 
 
 

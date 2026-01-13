@@ -47,10 +47,26 @@ final class Validator{
      */
 
     public static function positiveAmount($balance): void{
+        
         if(!is_numeric($balance) || $balance <=0 ){
             Json::error(422,'amount must be grater then 0');
         }
     }
+
+    /**
+     * requireInt()
+     * makes sure the card_id is integer
+     * prevents number values such as "abc"
+     */
+    public static function requireInt(string $field, $value){
+        
+        if(!is_int($value)){
+            Json::error(422, "$field must be an integer");
+        }
+
+        return (int) $value;
+    }
+
 
     /**
      * nonNegativeBalance()
@@ -143,6 +159,7 @@ final class Validator{
         Json::error(422, 'link_id format is invalid');
         }
 
+    
 }
 }
 
