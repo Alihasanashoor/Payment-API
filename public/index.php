@@ -110,7 +110,7 @@ if($method == 'POST' && $path =='/v1/transactions/withdraw'){
  */
 
 if($method == 'POST' && $path =='/v2/transactions/withdraw'){
-    require __DIR__ . '/../endpoints/transactions_withdraw.php';
+    require __DIR__ . '/../endpoints/transactions_withdrawal.php';
     exit;
 }
 

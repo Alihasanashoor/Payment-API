@@ -51,13 +51,21 @@ final class TransactionService{
                         'note' => 'Same Idempotency_Key used; returning previous result.'
                     ];
                 }
+                
+                // Serch for the card_id if not found return 404 status code
+                $card_check =$pdo->prepare('SELECT * FROM card WHERE Card_ID =?');
+                $card_check->execute([$cardId]);
+                $card = $card_check->fetch();
+                if(!$card){
+                    Json::error(404, 'Card not found');
+                }
 
-                //Insert a transaction row; triggers will set Balance_After + status and update card if success
+                //Insert a transaction row; triggers will set Balance_After + status and update card if success                
                 $insert=$pdo->prepare(' INSERT INTO `transaction`
                 (`Card_ID`, `Product`, `Amount`, `type`,`Idempotency_Key`)
                 VALUES (?, ?, ?, ?, ?)');
                 $insert->execute([$cardId, $product,$Amount_taken,'withdraw', $idemkey]);
-
+                
                 //returns the auto-increment ID of the last inserted row in this connection.
                 $autoID=(int)$pdo->lastInsertId();
                 //Query the row back
