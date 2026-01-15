@@ -39,7 +39,7 @@ def test_withdrawal_success(client):
         "card_id"           : 918,
         "Amount"            : 1.00,
         "product"           : "TEST Withdrawal",
-        "idempotency_key"   : "withdraw-test4"
+        "idempotency_key"   : "withdraw-test4-"
 }
     # Send a request
     response = client.post(client.base_url + "/v2/transactions/withdraw" ,
@@ -70,7 +70,7 @@ def test_withdrawal_card_not_found(client):
     # Send a request
     response = client.post(client.base_url + "/v2/transactions/withdraw", 
                            json=payload)
-    # Response Must fail 404 not found
+    
     assert response.status_code == 404
 
     # Parse JSON payload
@@ -131,6 +131,32 @@ def test_withdrawal_missing_required_fields(client, payload):
     # Errors MUST be returned under the `error` key
     assert "error" in response.json()
 
+@pytest.mark.business
+def test_withdrawal_Insufficient_funds(client):
+    """
+    Withdrawing from a card with lower balance then the amount must return 422.
+    """
+    # Prepare withdrawal request payload
+    payload = {
+        "card_id": 909,
+        "Amount": 1000,
+        "product": "ATM Withdrawal",
+        "idempotency_key": "withdraw-insufficient-funds-909"
+    }
+    # Send a request
+    response = client.post(client.base_url + "/v2/transactions/withdraw",
+                           json=payload)
+    # Response Must fail 422 Unprocessable Content
+    assert response.status_code == 422
+
+    # Parse JSON payload
+    data = response.json()
+    # Errors MUST be returned under the `error` key
+    assert "error" in data
+    # Assert correct error message
+    assert data["error"] == "Insufficient funds"
+
+
 @pytest.mark.slow
 def test_withdrawal_idempotency(client):
     """
@@ -176,14 +202,14 @@ def test_withdraw_idempotency_different_payload_same_idempotency_key(client):
         "card_id": 932 ,
         "Amount": 1.00,
         "product": "test-Withdrawal-new-idempotency_key",
-        "idempotency_key": "test-idempotency_key(9)"
+        "idempotency_key": "test-idempotency_key()"
     }
 
     Second_payload = {
         "card_id": 932 ,
         "Amount": 50.00,
         "product": "test-Withdrawal-same-idempotency_key",
-        "idempotency_key": "test-idempotency_key(9)"
+        "idempotency_key": "test-idempotency_key()"
     }
 
     # Send frist request

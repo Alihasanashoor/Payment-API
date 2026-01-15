@@ -3,7 +3,7 @@ declare(strict_types=1);
 namespace App;
 
 use Exception;
-
+use PDOException;
 final class Account{
     public static function CreateAccount(
         string $Name,

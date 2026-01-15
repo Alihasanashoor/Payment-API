@@ -50,6 +50,9 @@ Validator::positiveAmount($body['Amount']);
 //ensure that idempotency_key exists, also enforces a max length (64 chars)
 Validator::idempotencykey($body['idempotency_key']);
 
+// Ensure that card_id is int 
+Validator::requireInt('card_id', $body['card_id']);
+
 // Cast each field into the correct PHP type for safety.
 $cardId =(int)$body['card_id'];
 $amount =(float)$body['Amount'];

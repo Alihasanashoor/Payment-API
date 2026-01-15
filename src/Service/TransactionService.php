@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace App;
 
 use Exception;
+use PDOException;
 
 /**
  * TransactionService
@@ -91,10 +92,17 @@ final class TransactionService{
                 // check if there active database transaction right now
                 if($pdo->inTransaction()){
                     $pdo->rollBack();
-                    Json::error(500,'Transaction failed', ['details' => $e->getMessage()]);
-                    return [];
                 }
-                return[];
+                // If the exception message indicates an insufficient balance,
+                // return a client error (422) because the request itself is valid,
+                // but cannot be processed due to business rules (not enough funds).
+                if(str_contains($e->getMessage(), 'Insufficient funds')){
+                    Json::error(422, 'Insufficient funds');
+                }
+                // Any other exception is treated as an internal system failure.
+                // This prevents leaking sensitive error details (DB errors, stack traces, etc)
+                // and keeps the API consistent and secure.
+                Json::error(500, 'Transaction failed');
             }
 
 
@@ -124,6 +132,13 @@ final class TransactionService{
                         'transaction' => $existing,
                         'note' => 'Same Idempotency_Key used; returning previous result.'
                     ];
+                }
+                // Serch for the card_id if not found return 404 status code
+                $card_check =$pdo->prepare('SELECT * FROM card WHERE Card_ID =?');
+                $card_check->execute([$cardId]);
+                $card = $card_check->fetch();
+                if(!$card){
+                    Json::error(404, 'Card not found');
                 }
                 
                 $insert=$pdo->prepare(' INSERT INTO `transaction`
