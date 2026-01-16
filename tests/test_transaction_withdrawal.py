@@ -1,5 +1,8 @@
 import pytest
 
+# Import Shared variables for business-rule tests
+from conftest import INVALID_AMOUNTS, MISSING_REQUIRED_FIELDS
+
 @pytest.mark.auth
 def test_withdrawal_auth(client):
     """
@@ -84,9 +87,9 @@ def test_withdrawal_card_not_found(client):
 
 @pytest.mark.business
 # Run the same test multiple times with different inputs.
-@pytest.mark.parametrize("Amount" , [0,-1.00,-10.5])
+@pytest.mark.parametrize("Amount" , INVALID_AMOUNTS)
 
-def test_withdraw_invalid_amount(client, Amount):
+def test_withdrawal_invalid_amount(client, Amount):
     """
     Withdrawing with invalid amount must return 422.
     """
@@ -111,12 +114,7 @@ def test_withdraw_invalid_amount(client, Amount):
 @pytest.mark.business
 # Run the same test multiple times with different inputs.
 @pytest.mark.parametrize(
-    "payload",[
-        {"Amount":1.00, "product": "TEST", "idempotency_key": "TEST1"},
-        {"card_id": 932, "product": "TEST", "idempotency_key": "TEST2"},
-        {"card_id": 932, "amount": 1.00, "idempotency_key": "TEST3"},
-        {"card_id": 932, "amount": 1.00, "product": "TEST4"},
-        ])
+    "payload",MISSING_REQUIRED_FIELDS)
 
 def test_withdrawal_missing_required_fields(client, payload):
     """

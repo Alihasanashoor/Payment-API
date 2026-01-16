@@ -2,9 +2,19 @@ import os
 import pytest
 import requests
 
+# Shared invalid monetary values for business-rule tests
+INVALID_AMOUNTS = [0 ,-1.00, -10.5]
+
+# Shared missing required fields for business-rule tests
+MISSING_REQUIRED_FIELDS = [
+        {"Amount":1.00, "product": "TEST", "idempotency_key": "missing-card_id"},
+        {"card_id": 932, "product": "TEST", "idempotency_key": "missing-amount"},
+        {"card_id": 932, "Amount": 1.00, "idempotency_key": "missing-product"},
+        {"card_id": 932, "Amount": 1.00, "product": "missing-idem"},
+        ]
+
 
 # Global configuration
-
 @pytest.fixture(scope="session")
 def base_url():
     """
