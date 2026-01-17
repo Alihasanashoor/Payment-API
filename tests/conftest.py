@@ -1,6 +1,8 @@
 import os
 import pytest
 import requests
+import uuid
+import random
 
 # Shared invalid monetary values for business-rule tests
 INVALID_AMOUNTS = [0 ,-1.00, -10.5]
@@ -13,6 +15,33 @@ MISSING_REQUIRED_FIELDS = [
         {"card_id": 932, "Amount": 1.00, "product": "missing-idem"},
         ]
 
+
+@pytest.fixture
+def unique_email():
+    """
+    Generates a unique email for each test.
+    - Uses a UUID to guarantee uniqueness across test runs
+    - Prevents collisions with existing records in the database
+    - Produces a readable and realistic email format
+    """
+    return f"user_{uuid.uuid4().hex[:8]}@example.com"
+
+@pytest.fixture
+def unique_phone():
+    """ 
+    Generates a unique numeric phone number for testing.
+    - Ensures digits-only format (no symbols or spaces)
+    - Produces a realistic phone number length
+    - Randomized to avoid collisions across test cases
+    - Starts with '9' to match local numbering rules (if applicable)
+    """
+    return f"9{random.randint(100000000, 999999999)}"
+
+
+# Generate unique keys (idempotency_key) automatically.
+@pytest.fixture
+def idempotency_key():
+    return str(uuid.uuid4())
 
 # Global configuration
 @pytest.fixture(scope="session")

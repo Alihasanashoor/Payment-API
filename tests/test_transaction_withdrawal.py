@@ -1,7 +1,9 @@
 import pytest
 
+
+
 # Import Shared variables for business-rule tests
-from conftest import INVALID_AMOUNTS, MISSING_REQUIRED_FIELDS
+from conftest import INVALID_AMOUNTS, MISSING_REQUIRED_FIELDS, idempotency_key
 
 @pytest.mark.auth
 def test_withdrawal_auth(client):
@@ -33,7 +35,7 @@ def test_withdrawal_json(client):
     assert isinstance(data, dict)
 
 @pytest.mark.business
-def test_withdrawal_success(client):
+def test_withdrawal_success(client, idempotency_key):
     """
     Withdrawing a valid amount from an existing card must succeed.
     """
@@ -42,7 +44,7 @@ def test_withdrawal_success(client):
         "card_id"           : 918,
         "Amount"            : 1.00,
         "product"           : "TEST Withdrawal",
-        "idempotency_key"   : "withdraw-test4-"
+        "idempotency_key"   : f"withdrawal-success-{idempotency_key}"
 }
     # Send a request
     response = client.post(client.base_url + "/v2/transactions/withdraw" ,
@@ -68,7 +70,7 @@ def test_withdrawal_card_not_found(client):
         "card_id"           : 941,
         "Amount"            : 10.00,
         "product"           : "TEST Withdrawal",
-        "idempotency_key"   : "withdraw-test(2)"
+        "idempotency_key"   : "withdraw-test-card-not-found"
     }
     # Send a request
     response = client.post(client.base_url + "/v2/transactions/withdraw", 
@@ -98,7 +100,7 @@ def test_withdrawal_invalid_amount(client, Amount):
         "card_id"           : 932,
         "Amount"            : Amount,
         "product"           : "TEST Withdrawal",
-        "idempotency_key"   : "withdraw-test(2)"
+        "idempotency_key"   : "withdraw-test-invalid-amount"
     }
 
     # Send a request
@@ -139,7 +141,7 @@ def test_withdrawal_Insufficient_funds(client):
         "card_id": 909,
         "Amount": 1000,
         "product": "ATM Withdrawal",
-        "idempotency_key": "withdraw-insufficient-funds-909"
+        "idempotency_key": "withdraw-insufficient-funds"
     }
     # Send a request
     response = client.post(client.base_url + "/v2/transactions/withdraw",
@@ -156,7 +158,7 @@ def test_withdrawal_Insufficient_funds(client):
 
 
 @pytest.mark.slow
-def test_withdrawal_idempotency(client):
+def test_withdrawal_idempotency(client, idempotency_key):
     """
     Verifies idempotent behavior for withdrawal requests.
 
@@ -164,12 +166,14 @@ def test_withdrawal_idempotency(client):
     must return the same HTTP status and response payload,
     without executing the transaction multiple times.
     """
+    # Generate idempotency_key 
+    idem = idempotency_key
     # Prepare withdrawal request payload
     payload = {
         "card_id": 932 ,
-        "amount": 5.00,
+        "Amount": 1.00,
         "product": "ATM Withdrawal",
-        "idempotency_key": "withdraw-dub-idempotent-"
+        "idempotency_key": f"withdrawal-{idem}"
     }
 
     # Send frist request
@@ -179,15 +183,22 @@ def test_withdrawal_idempotency(client):
     # Replay the exact same request (same idempotency key + payload)
     response_2 = client.post(client.base_url + "/v2/transactions/withdraw",
                              json=payload)
+    # First request must succeed and create the resource
+    assert response.status_code == 201
     
-    # Idempotency check:
-    # Repeated requests with the same idempotency key must return
-    # the same status code and response payload
-    assert response.status_code == response_2.status_code
-    assert response.json() == response_2.json()
+    # Second request reusing the same idempotency key with a different payload
+    # must be rejected to prevent duplicate or conflicting operations
+    assert response_2.status_code == 409
+
+    # Parse JSON payload
+    data = response_2.json()
+    
+    # Checks the API returned a JSON object
+    assert isinstance(data, dict)
 
 @pytest.mark.slow
-def test_withdraw_idempotency_different_payload_same_idempotency_key(client):
+def test_withdraw_idempotency_different_payload_same_idempotency_key(client, idempotency_key):
+    
     """
     Ensures idempotency keys cannot be reused with different payloads.
 
@@ -196,18 +207,20 @@ def test_withdraw_idempotency_different_payload_same_idempotency_key(client):
     but a different payload must be rejected to prevent
     conflicting or duplicate transactions.
     """
+    # Generate idempotency_key to be used in both payloads
+    idem = idempotency_key
     Frist_payload = {
         "card_id": 932 ,
         "Amount": 1.00,
         "product": "test-Withdrawal-new-idempotency_key",
-        "idempotency_key": "test-idempotency_key()"
+        "idempotency_key": f"test-{idem}"
     }
 
     Second_payload = {
         "card_id": 932 ,
         "Amount": 50.00,
         "product": "test-Withdrawal-same-idempotency_key",
-        "idempotency_key": "test-idempotency_key()"
+        "idempotency_key": f"test-{idem}"
     }
 
     # Send frist request

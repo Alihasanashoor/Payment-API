@@ -16,6 +16,24 @@ final class Account{
         $pdo= database::pdo();
 
         try{
+        // Check for duplicate phone number to enforce account uniqueness.
+        $phoneCheck = $pdo->prepare('SELECT * FROM accounts WHERE Phone_Number = ? LIMIT 1');
+        $phoneCheck->execute([$Phone_Number]);
+
+        // If a record is found, reject the request to prevent duplicate accounts.
+        if($phoneCheck->fetch()){
+            // HTTP 409 Conflict indicates a resource uniqueness violation.
+            Json::error(409, 'Phone number already exists');
+        }
+        // Check for duplicate email address to enforce unique account identity.
+        $emaliCheck = $pdo->prepare('SELECT * FROM accounts WHERE email  = ? LIMIT 1');
+        $emaliCheck->execute([$emali]);
+
+        // If a record is found, reject the request to prevent duplicate accounts.
+        if($emaliCheck->fetch()){
+            // HTTP 409 Conflict indicates a resource uniqueness violation.
+            Json::error(409, 'Email already exists');
+        }
             //Start atomic transaction (everything succeeds or nothing
             // telling MySQL: “I’m starting a transaction — don’t finalize changes until I say so.”
             $pdo->beginTransaction();
@@ -76,9 +94,7 @@ final class Account{
             if($pdo->inTransaction()){
                 $pdo->rollBack();
             }
-            Json::error(500, 'failed to create account' , ['detalis' => $e->getMessage()]);
-            return [];
-            
+            Json::error(500, 'failed to create account');
         }
 
     }

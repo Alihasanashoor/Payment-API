@@ -48,7 +48,7 @@ $headers = function_exists('getallheaders') ? getallheaders() : [];
 Validator::required($body,['Name', 'Phone_Number', 'email', 'Link_ID', 'balance']);
 
 //Ensure the `amount` field is a positive number.
-Validator::nonNegativeBalance($body['balance']);
+Validator::positiveAmount($body['balance']);
 
 // ensure the phone number is valid with no letters or special character's
 Validator::validatePhoneNumber($body['Phone_Number']);

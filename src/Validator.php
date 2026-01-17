@@ -68,17 +68,6 @@ final class Validator{
     }
 
 
-    /**
-     * nonNegativeBalance()
-     * makes sure the amount/balance is not less then 0
-     * prevents negative balance inserted in database
-     */
-
-    public static function nonNegativeBalance($balance){
-        if(!is_numeric($balance) || $balance <0 ){
-            Json::error(422, 'initial balance cannot be negative');
-        }
-    }
 
     /**
      * indempotencykey()

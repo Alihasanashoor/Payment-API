@@ -11,7 +11,7 @@ def test_deposit_auth(client):
     """
     # Send a request
     response = client.get(client.base_url + "/v2/transactions/deposit")
-    # Must NOT be auth failure
+     # Send a request
     assert response.status_code != 401
 
 @pytest.mark.auth
@@ -32,16 +32,16 @@ def test_deposit_json(client):
     assert isinstance(data, dict)
 
 @pytest.mark.business
-def test_deposit_success(client):
+def test_deposit_success(client, idempotency_key):
     """
-    Withdrawing a valid amount from an existing card must succeed.
+    deposit a valid amount from an existing card must succeed.
     """
     # Prepare withdrawal request payload
     payload = {
         "card_id"           : 918,
         "Amount"            : 5.00,
         "product"           : "TEST deposit",
-        "idempotency_key"   : "deposit-test2"
+        "idempotency_key"   : f"deposit-success-{idempotency_key}"
     }   
     # Send a request
     response = client.post(client.base_url + "/v2/transactions/deposit",
@@ -106,4 +106,132 @@ def test_deposit_invalid_amount(client,Amount):
 
     # Errors MUST be returned under the `error` key
     assert "error" in response.json()
+@pytest.mark.business
+@pytest.mark.parametrize("amount", [0.00, -1.00])
+def test_deposit_Insufficient_funds(client, amount):
+    """
+    depositing a card with lower balance then the amount must return 422.
+    """
+    # Prepare withdrawal request payload
+    payload = {
+        "card_id": 909,
+        "Amount": amount,
+        "product": "ATM Withdrawal",
+        "idempotency_key": "withdraw-insufficient-funds"
+    }
+    # Send a request
+    respone = client.post(client.base_url + "/v2/transactions/deposit",
+                          json=payload)
+    
+    # Response Must fail 422 Unprocessable Content
+    assert respone.status_code == 422
+    # Parse JSON payload
+    data = respone.json()
+    # Errors MUST be returned under the `error` key
+    assert "error" in data
+    # Assert correct error message
+    assert data["error"] == "amount must be grater then 0"
+
+
+@pytest.mark.business
+# Run the same test multiple times with different inputs.
+@pytest.mark.parametrize("payload", MISSING_REQUIRED_FIELDS)
+
+def test_deposit_missing_required_fields(client, payload):
+    """
+    depositing with missing required fields must return 422.
+    """
+    # Send a request
+    response = client.post(client.base_url + "/v2/transactions/deposit",
+                           json=payload)
+    # Response Must fail 422 Unprocessable Content
+    assert response.status_code == 422
+    # Errors MUST be returned under the `error` key
+    assert "error" in response.json()
+
+
+@pytest.mark.slow
+def test_deposit_idempotency(client, idempotency_key):
+    """
+    Verifies idempotent behavior for deposit requests.
+
+    Repeating the same request with the same idempotency key
+    must return the same HTTP status and response payload,
+    without executing the transaction multiple times.
+    """
+    idem = idempotency_key
+    payload = {
+        "card_id": 932 ,
+        "Amount": 1.00,
+        "product": "Deposit test",
+        "idempotency_key": f"deposit-{idem}"
+    }
+
+    # Send frist request
+    response = client.post(client.base_url + "/v2/transactions/deposit", 
+                           json=payload)
+    
+    # Replay the exact same request (same idempotency key + payload)
+    response_2 = client.post(client.base_url + "/v2/transactions/deposit",
+                             json=payload)
+
+    # First request must succeed and create the resource
+    assert response.status_code == 201
+    
+    # Second request reusing the same idempotency key with a different payload
+    # must be rejected to prevent duplicate or conflicting operations
+    assert response_2.status_code == 409
+
+    # Parse JSON payload
+    data = response_2.json()
+    
+    # Checks the API returned a JSON object
+    assert isinstance(data, dict)
+
+@pytest.mark.slow
+def test_deposit_idempotency_different_payload_same_idempotency_key(client, idempotency_key):
+    """
+    Ensures idempotency keys cannot be reused with different payloads.
+
+    The first request must be processed successfully.
+    Any subsequent request using the same idempotency key
+    but a different payload must be rejected to prevent
+    conflicting or duplicate transactions.
+    """
+    idem = idempotency_key
+    Frist_payload = {
+        "card_id": 932 ,
+        "Amount": 1.00,
+        "product": "test-Deposit-new-idempotency_key",
+        "idempotency_key": idem
+    }
+
+    Second_payload = {
+        "card_id": 932 ,
+        "Amount": 50.00,
+        "product": "test-Deposit-same-idempotency_key",
+        "idempotency_key": idem
+    }
+    
+    # Send frist request
+    response = client.post(client.base_url + "/v2/transactions/deposit",
+                           json = Frist_payload)
+    
+    # Send second request
+    response_2 = client.post(client.base_url + "/v2/transactions/deposit",
+                             json = Second_payload)
+    
+    # First request must succeed and create the resource
+    assert response.status_code == 201
+
+    # Second request reusing the same idempotency key with a different payload
+    # must be rejected to prevent duplicate or conflicting operations
+    assert response_2.status_code == 409
+
+    # Parse JSON payload
+    data = response_2.json()
+
+    # Ensure the API adheres to the JSON error contract
+    # Checks the API returned a JSON object
+    assert isinstance(data, dict)
 

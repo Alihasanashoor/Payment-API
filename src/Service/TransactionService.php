@@ -31,28 +31,62 @@ final class TransactionService{
         int $cardId,
         string $product,
         string $idemkey,
-        float $Amount_taken)
+        float $Amount_taken
+        )
         {
             //Get a PDO connection(via Database.php)
             $pdo= database::pdo();
 
             try{
-                // Start atomic transaction (everything succeeds or nothing
-                // telling MySQL: “I’m starting a transaction — don’t finalize changes until I say so.”
-                $pdo->beginTransaction();
+                
 
+                // Generate a deterministic hash of the transaction payload.
+                // This is used to enforce idempotency integrity:
+                // - The same idempotency key MUST always be used with the same payload.
+                // - Reusing an idempotency key with different data will produce a different hash
+                //   and must be rejected to prevent duplicate or tampered transactions.
+
+                $payloadHash = hash(
+                    'sha256', 
+                    
+                    // Business-critical fields that uniquely define this withdrawal
+                    json_encode([
+                        'card_id' => $cardId,
+                        'Amount'  => $Amount_taken,
+                        'product' => $product,
+                        'type'    => 'withdraw'
+
+                    ],
+                    // Throw an exception if JSON encoding fails to avoid hashing invalid data 
+                    JSON_THROW_ON_ERROR)
+                );
                 //Idempotency: if this idem key was used before, return that row (no double charge)
                 $check=$pdo->prepare('SELECT * FROM `transaction` WHERE `Idempotency_Key` = ? LIMIT 1');
                 $check->execute([$idemkey]);
                 if($existing=$check->fetch()){
-                    $pdo->commit();
-                    return[
-                        'idempotent' => true,
+                    // Compare payloads
+                    // If the same idempotency key is reused, the request payload MUST be identical.
+                    // A mismatch here indicates either a client bug or a potential replay/tampering attempt.
+                    if($existing['payload_hash'] !== $payloadHash){
+                        // Roll back any open transaction to ensure no partial state changes
+                        if($pdo->inTransaction()){
+                            $pdo->rollBack();
+                        }
+                        // Reject the request to prevent conflicting or duplicate transactions
+                        // HTTP 409 Conflict is returned because the idempotency key
+                        Json::error(409,'Idempotency key already used with a different payload');
+                    }
+                    
+                    // Return the previously recorded transaction instead of executing
+                    return [
+                        'idempotent'  => true,
                         'transaction' => $existing,
-                        'note' => 'Same Idempotency_Key used; returning previous result.'
+                        'note'        => 'Same Idempotency_Key used; returning previous result.'
                     ];
                 }
-                
+                // Start atomic transaction (everything succeeds or nothing
+                // telling MySQL: “I’m starting a transaction — don’t finalize changes until I say so.”
+                $pdo->beginTransaction();
                 // Serch for the card_id if not found return 404 status code
                 $card_check =$pdo->prepare('SELECT * FROM card WHERE Card_ID =?');
                 $card_check->execute([$cardId]);
@@ -63,9 +97,9 @@ final class TransactionService{
 
                 //Insert a transaction row; triggers will set Balance_After + status and update card if success                
                 $insert=$pdo->prepare(' INSERT INTO `transaction`
-                (`Card_ID`, `Product`, `Amount`, `type`,`Idempotency_Key`)
-                VALUES (?, ?, ?, ?, ?)');
-                $insert->execute([$cardId, $product,$Amount_taken,'withdraw', $idemkey]);
+                (`Card_ID`, `Product`, `Amount`, `type`,`Idempotency_Key`, `payload_hash`)
+                VALUES (?, ?, ?, ?, ?,?)');
+                $insert->execute([$cardId, $product,$Amount_taken,'withdraw', $idemkey, $payloadHash]);
                 
                 //returns the auto-increment ID of the last inserted row in this connection.
                 $autoID=(int)$pdo->lastInsertId();
@@ -118,21 +152,54 @@ final class TransactionService{
             //Get a PDO connection(via Database.php)
             $pdo= database::pdo();
             try{
-                // Start atomic transaction (everything succeeds or nothing
-                // telling MySQL: “I’m starting a transaction — don’t finalize changes until I say so.”
-                $pdo->beginTransaction();
+
+                // Generate a deterministic hash of the transaction payload.
+                // This is used to enforce idempotency integrity:
+                // - The same idempotency key MUST always be used with the same payload.
+                // - Reusing an idempotency key with different data will produce a different hash
+                //   and must be rejected to prevent duplicate or tampered transactions.
+
+                $payloadHash = hash(
+                    'sha256',
+
+                    // Business-critical fields that uniquely define this withdrawal
+                    json_encode([
+                        'card_id' => $cardId,
+                        'Amount'  => $Amount_send,
+                        'product' => $product,
+                        'type'    => 'deposit'
+                    ],
+                    // Throw an exception if JSON encoding fails to avoid hashing invalid data
+                    JSON_THROW_ON_ERROR)
+                );
 
                 //idempotency: if this idem key was used before, return that raw (no double charge)
                 $check=$pdo->prepare('SELECT * FROM `transaction` WHERE `Idempotency_Key` = ? LIMIT 1');
                 $check->execute([$idemkey]);
                 if($existing=$check->fetch()){
-                    $pdo->commit();
-                    return [
-                        'idempotent' => true,
+                    // Compare payloads
+                    // If the same idempotency key is reused, the request payload MUST be identical.
+                    // A mismatch here indicates either a client bug or a potential replay/tampering attempt.
+                    if($existing['payload_hash'] !== $payloadHash){
+                        // Roll back any open transaction to ensure no partial state changes
+                        if($pdo->inTransaction()){
+                            $pdo->rollBack();
+                        }
+                        // Reject the request to prevent conflicting or duplicate transactions
+                        // HTTP 409 Conflict is returned because the idempotency key
+                        Json::error(409, 'Idempotency key already used with a different payload');
+
+                    }
+                    // Return the previously recorded transaction instead of executing
+                    return[
+                        'idempotent'  => true,
                         'transaction' => $existing,
-                        'note' => 'Same Idempotency_Key used; returning previous result.'
+                        'note'        => 'Same Idempotency_Key used; returning previous result.'
                     ];
                 }
+                // Start atomic transaction (everything succeeds or nothing
+                // telling MySQL: “I’m starting a transaction — don’t finalize changes until I say so.”
+                $pdo->beginTransaction();
                 // Serch for the card_id if not found return 404 status code
                 $card_check =$pdo->prepare('SELECT * FROM card WHERE Card_ID =?');
                 $card_check->execute([$cardId]);
@@ -142,9 +209,9 @@ final class TransactionService{
                 }
                 
                 $insert=$pdo->prepare(' INSERT INTO `transaction`
-                (`Card_ID`, `Product`, `Amount`, `type`,`Idempotency_Key`)
-                VALUES (?, ?, ?, ?, ?)');
-                $insert->execute([$cardId, $product,$Amount_send,'deposit', $idemkey]);
+                (`Card_ID`, `Product`, `Amount`, `type`,`Idempotency_Key`, `payload_hash`)
+                VALUES (?, ?, ?, ?,?, ?)');
+                $insert->execute([$cardId, $product,$Amount_send,'deposit', $idemkey, $payloadHash]);
 
                 // Return the auto-increment ID of the last inserted row in this connection.
                 $autoID=(int)$pdo->lastInsertId();
@@ -170,10 +237,18 @@ final class TransactionService{
 
             } catch(Exception $e){
                 if($pdo->inTransaction()){
-                    $pdo->rollBack();
-                    Json::error(500,'Transaction failed', ['details' => $e->getMessage()]);
-                
+                    $pdo->rollBack();                
                 }
+                // If the exception message indicates an insufficient balance,
+                // return a client error (422) because the request itself is valid,
+                // but cannot be processed due to business rules (not enough funds).
+                if(str_contains($e->getMessage(), "Insufficient funds")){
+                    return Json::error(422, 'Insufficient funds');
+                }
+                // Any other exception is treated as an internal system failure.
+                // This prevents leaking sensitive error details (DB errors, stack traces, etc)
+                // and keeps the API consistent and secure.
+                Json::error(500, 'Transaction failed');
                 
             }
     }
