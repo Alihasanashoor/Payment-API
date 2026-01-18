@@ -45,7 +45,16 @@ $headers = function_exists('getallheaders') ? getallheaders() : [];
 
 //Ensure all required fields are present in the request.
 //If any are missing, Validator::required() will stop and return HTTP 422.
-Validator::required($body,['Name', 'Phone_Number', 'email', 'Link_ID', 'balance']);
+Validator::required($body,['Name', 'Phone_Number', 'email', 'balance']);
+
+/**
+ * Normalize optional Link_ID
+*/
+$Link_ID = $body['Link_ID'] ?? null;
+
+if($Link_ID === ''){
+    $Link_ID = null;
+}
 
 //Ensure the `amount` field is a positive number.
 Validator::positiveAmount($body['balance']);
@@ -59,31 +68,19 @@ Validator::validateEmail($body['email']);
 // ensure the link id is 3 characters & and only digets not letters allowed , if empty it is valid  
 Validator::validateLinkID($body['Link_ID']);
 
-
+// Cast inputs to expected types
 $Name= (string) $body['Name'];
 $Phone_Number= (string)$body['Phone_Number'];
 $email= (string)$body['email'];
-$Link_ID= $body['Link_ID'] === ''? null: (int) $body['Link_ID'];
 $balance= (float)$body['balance'];
 
 
 // call Account::CreateAccount(), which interacts with the DB.
 $result = Account::CreateAccount($Name, $Phone_Number, $email, $Link_ID, $balance );
 
-
-//Decide which HTTP status code to return, based on the result:
-//return HTTP 201 Created
-if(($result['status'] ?? null) == 'success'){
-    Json::ok(201,$result);
-}
-
-
-
-//Any other situation (such as failed trigger)
-//Return HTTP 409 Conflict, meaning "we understood the request, but couldn’t complete it."
-Json::ok(409,$result);
-
-
+// If execution reaches this point, the account was created successfully.
+// Therefore, we ALWAYS return HTTP 201 Created.
+Json::ok(201,$result);
 
 
 ?>

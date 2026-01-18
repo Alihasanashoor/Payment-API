@@ -32,14 +32,31 @@ def test_create_account_json(client):
 
 @pytest.mark.business
 def test_create_account_success(client, unique_email, unique_phone):
+    """
+    creating account with valid payload.
+    """
+    # Prepare withdrawal request payload
     payload = {
         "Name": "Test User",
         "Phone_Number": unique_phone,
         "email": unique_email,
+        "Link_ID": "",
         "balance": 100.0
     }
+    # Send a request
     responce = client.post(client.base_url + "/v2/Account/create_Account",
                            json=payload)
     
+    # Response Must Resource successfully created 201
     assert responce.status_code == 201
-    assert isinstance(responce.json, dict)
+
+    # Parse JSON payload
+    data = responce.json()
+
+    # Checks the API returned a JSON object
+    assert isinstance(data, dict)
+
+@pytest.mark.business
+def test_create_account_success_with_Link_ID(client):
+    #temp
+    pass

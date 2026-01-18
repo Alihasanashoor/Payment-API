@@ -9,7 +9,7 @@ final class Account{
         string $Name,
         string $Phone_Number,
         string $emali,
-        ?int $linkId,
+        ?string $linkId,
         float $balance
     ){
         //Get a PDO connection(via Database.php)
@@ -33,6 +33,15 @@ final class Account{
         if($emaliCheck->fetch()){
             // HTTP 409 Conflict indicates a resource uniqueness violation.
             Json::error(409, 'Email already exists');
+        }
+        // Check for duplicate phone number to enforce account uniqueness.
+        if($linkId !== null){
+        $Link_ID_Check = $pdo->prepare('SELECT * FROM accounts WHERE Link_ID = ? LIMIT 1');
+        $Link_ID_Check->execute([$linkId]);
+        // If a record is found, reject the request to prevent duplicate accounts.
+        if($Link_ID_Check->fetch()){
+            Json::error(409, 'Link_ID already exists');
+            }
         }
             //Start atomic transaction (everything succeeds or nothing
             // telling MySQL: “I’m starting a transaction — don’t finalize changes until I say so.”

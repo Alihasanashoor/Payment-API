@@ -140,8 +140,11 @@ final class Validator{
         // Trim spaces to removes leading spaces, leading spaces, and tabs / newlines
         $link_ID= trim($link_ID);
 
-        if(strlen($link_ID) !== 3){
-            Json::error(422, 'link_id must be exactly 3 characters');
+        if(!is_string($link_ID)){
+            Json::error(422, 'Link_ID must be a string');
+        }
+        if(strlen($link_ID) < 3){
+            Json::error(422, 'link_id must be exactly 3 digits');
         }
 
         if (!preg_match('/^[0-9]+$/i', $link_ID)) {
