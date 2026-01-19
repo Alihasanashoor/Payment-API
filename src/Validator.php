@@ -53,6 +53,12 @@ final class Validator{
         }
     }
 
+    public static function validateBalnce($balance){
+        if(!is_numeric($balance) || $balance < 20){
+            Json::error(422,'Balance must be grater or equal then 20');
+        }
+    }
+
     /**
      * requireInt()
      * makes sure the card_id is integer
@@ -133,23 +139,23 @@ final class Validator{
      */
 
     public static function validateLinkID($link_ID){
+
+        // Allow null or empty string, treated as NULL
         if($link_ID == null || $link_ID == ''){
             return;
         }
-
+        
         // Trim spaces to removes leading spaces, leading spaces, and tabs / newlines
         $link_ID= trim($link_ID);
 
+        
         if(!is_string($link_ID)){
             Json::error(422, 'Link_ID must be a string');
         }
-        if(strlen($link_ID) < 3){
-            Json::error(422, 'link_id must be exactly 3 digits');
-        }
-
-        if (!preg_match('/^[0-9]+$/i', $link_ID)) {
-        Json::error(422, 'link_id format is invalid');
-        }
+        // MIN = 3 digits, MAX = 8 digits
+        if (!preg_match('/^[0-9]{3,8}$/', $link_ID)) {
+        Json::error(422, 'link_id must be between 3 and 8 digits');
+    }
 
     
 }

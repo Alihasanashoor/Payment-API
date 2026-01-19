@@ -56,8 +56,11 @@ if($Link_ID === ''){
     $Link_ID = null;
 }
 
-//Ensure the `amount` field is a positive number.
+//Ensure the `balance` field is a positive number.
 Validator::positiveAmount($body['balance']);
+
+//Ensure the `balance` field is a not less then 20.00.
+Validator::validateBalnce($body['balance']);
 
 // ensure the phone number is valid with no letters or special character's
 Validator::validatePhoneNumber($body['Phone_Number']);

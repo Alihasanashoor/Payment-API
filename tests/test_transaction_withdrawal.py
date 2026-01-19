@@ -41,7 +41,7 @@ def test_withdrawal_success(client, idempotency_key):
     """
     # Prepare withdrawal request payload
     payload = {
-        "card_id"           : 918,
+        "card_id"           : 948,
         "Amount"            : 1.00,
         "product"           : "TEST Withdrawal",
         "idempotency_key"   : f"withdrawal-success-{idempotency_key}"
@@ -51,7 +51,8 @@ def test_withdrawal_success(client, idempotency_key):
                            json=payload)
     
     # Response Must Resource successfully created 201
-    assert response.status_code == 201
+    # Indicating a validation error. If the assertion fails, include the raw
+    assert response.status_code == 201, response.text
 
     # Parse JSON payload
     data = response.json()
@@ -61,7 +62,7 @@ def test_withdrawal_success(client, idempotency_key):
 
 
 @pytest.mark.business
-def test_withdrawal_card_not_found(client):
+def test_withdrawal_card_not_found(client, idempotency_key):
     """
     Withdrawing from a non-existent card must return 404.
     """
@@ -70,13 +71,14 @@ def test_withdrawal_card_not_found(client):
         "card_id"           : 941,
         "Amount"            : 10.00,
         "product"           : "TEST Withdrawal",
-        "idempotency_key"   : "withdraw-test-card-not-found"
+        "idempotency_key"   : f"withdraw-card-not-found{idempotency_key}"
     }
     # Send a request
     response = client.post(client.base_url + "/v2/transactions/withdraw", 
                            json=payload)
-    
-    assert response.status_code == 404
+    # Response Must fail 422 Unprocessable Content
+    # Indicating a validation error. If the assertion fails, include the raw
+    assert response.status_code == 404, response.text
 
     # Parse JSON payload
     data = response.json()
@@ -97,7 +99,7 @@ def test_withdrawal_invalid_amount(client, Amount):
     """
     # Prepare withdrawal request payload
     payload = {
-        "card_id"           : 932,
+        "card_id"           : 948,
         "Amount"            : Amount,
         "product"           : "TEST Withdrawal",
         "idempotency_key"   : "withdraw-test-invalid-amount"
@@ -108,7 +110,8 @@ def test_withdrawal_invalid_amount(client, Amount):
                            json= payload)
     
     # Response Must fail 422 Unprocessable Content
-    assert response.status_code == 422
+    # Indicating a validation error. If the assertion fails, include the raw
+    assert response.status_code == 422, response.text
 
     # Errors MUST be returned under the `error` key
     assert "error" in response.json()
@@ -127,7 +130,8 @@ def test_withdrawal_missing_required_fields(client, payload):
                            json=payload)
     
     # Response Must fail 422 Unprocessable Content
-    assert response.status_code == 422
+    # Indicating a validation error. If the assertion fails, include the raw
+    assert response.status_code == 422, response.text
     # Errors MUST be returned under the `error` key
     assert "error" in response.json()
 
@@ -138,7 +142,7 @@ def test_withdrawal_Insufficient_funds(client):
     """
     # Prepare withdrawal request payload
     payload = {
-        "card_id": 909,
+        "card_id": 948,
         "Amount": 1000,
         "product": "ATM Withdrawal",
         "idempotency_key": "withdraw-insufficient-funds"
@@ -147,7 +151,8 @@ def test_withdrawal_Insufficient_funds(client):
     response = client.post(client.base_url + "/v2/transactions/withdraw",
                            json=payload)
     # Response Must fail 422 Unprocessable Content
-    assert response.status_code == 422
+    # Indicating a validation error. If the assertion fails, include the raw
+    assert response.status_code == 422, response.text
 
     # Parse JSON payload
     data = response.json()
@@ -170,7 +175,7 @@ def test_withdrawal_idempotency(client, idempotency_key):
     idem = idempotency_key
     # Prepare withdrawal request payload
     payload = {
-        "card_id": 932 ,
+        "card_id": 948 ,
         "Amount": 1.00,
         "product": "ATM Withdrawal",
         "idempotency_key": f"withdrawal-{idem}"
@@ -184,11 +189,13 @@ def test_withdrawal_idempotency(client, idempotency_key):
     response_2 = client.post(client.base_url + "/v2/transactions/withdraw",
                              json=payload)
     # First request must succeed and create the resource
-    assert response.status_code == 201
+    # Indicating a validation error. If the assertion fails, include the raw
+    assert response.status_code == 201, response.text
     
     # Second request reusing the same idempotency key with a different payload
     # must be rejected to prevent duplicate or conflicting operations
-    assert response_2.status_code == 409
+    # Indicating a validation error. If the assertion fails, include the raw
+    assert response_2.status_code == 409, response_2.text
 
     # Parse JSON payload
     data = response_2.json()
@@ -210,14 +217,14 @@ def test_withdraw_idempotency_different_payload_same_idempotency_key(client, ide
     # Generate idempotency_key to be used in both payloads
     idem = idempotency_key
     Frist_payload = {
-        "card_id": 932 ,
+        "card_id": 948 ,
         "Amount": 1.00,
         "product": "test-Withdrawal-new-idempotency_key",
         "idempotency_key": f"test-{idem}"
     }
 
     Second_payload = {
-        "card_id": 932 ,
+        "card_id": 948 ,
         "Amount": 50.00,
         "product": "test-Withdrawal-same-idempotency_key",
         "idempotency_key": f"test-{idem}"
@@ -232,11 +239,15 @@ def test_withdraw_idempotency_different_payload_same_idempotency_key(client, ide
                              json = Second_payload)
     
     # First request must succeed and create the resource
-    assert response.status_code == 201
+    # Indicating a validation error. If the assertion fails, include the raw
+
+    assert response.status_code == 201, response.text
 
     # Second request reusing the same idempotency key with a different payload
     # must be rejected to prevent duplicate or conflicting operations
-    assert response_2.status_code == 409
+    # Indicating a validation error. If the assertion fails, include the raw
+
+    assert response_2.status_code == 409, response_2.text
 
     # Parse JSON payload
     data = response_2.json()
