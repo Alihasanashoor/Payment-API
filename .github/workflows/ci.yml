@@ -56,11 +56,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest requests
 
-      - name: Configure environment
-        run: |
-          cp .env.example .env
-
+      - name: Generate .env file for PHP
+        run:  |
+          cat <<EOF > .env
+          API_KEY=${API_KEY}
+          API_BASE_URL=${API_BASE_URL}
+          DB_HOST=${DB_HOST}
+          DB_NAME=${DB_NAME}
+          DB_USER=${DB_USER}
+          DB_PASS=${DB_PASS}
+          EOF
       - name: Start API
+        run: |
+          php -S 127.0.0.1:8000 -t public > server.log 2>&1 &
+      - name: Wait for API to be ready
         run: |
           for i in {1..15}; do
             if curl -s http://127.0.0.1:8000/v1/ping > /dev/null; then
@@ -72,6 +81,11 @@ jobs:
           done
           echo "API did not start in time"
           exit 1
+      - name: Show server log
+        if: failure()
+        run: |
+          echo "===== PHP SERVER LOG ====="
+          cat server.log || true
 
       - name: Run tests
         run: |
