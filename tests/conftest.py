@@ -50,10 +50,10 @@ def base_url():
     Base URL for the Payment API.
     Must be provided via environment variable.
     """
-    url = os.getenv("API_BASE_URL")
-    if not url:
+    API_BASE_URL = os.getenv("API_BASE_URL")
+    if not API_BASE_URL:
         raise RuntimeError("API base URL environment variable is not set")
-    return url
+    return API_BASE_URL
 
 @pytest.fixture(scope="session")
 def api_key():

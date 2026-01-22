@@ -8,7 +8,7 @@ def test_missing_api_key(base_url):
     """
     response = requests.get(base_url+ "/v1/students/resolve")
 
-    assert response.status_code == 401 
+    assert response.status_code == 401, response.text
 
     data = response.json()
     assert data["error"] == "Missing API key"
