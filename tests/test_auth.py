@@ -1,6 +1,6 @@
 import requests
 import pytest
-
+    
 @pytest.mark.auth
 def test_missing_api_key(base_url):
     """
