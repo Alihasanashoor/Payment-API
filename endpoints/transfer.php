@@ -22,6 +22,9 @@ $headers = function_exists('getallheaders') ? getallheaders() : [];
 // If any are missing, Validator::required() will stop and return HTTP 422.
 Validator::required($body,['from_iban', 'to_iban', 'amount']);
 
+// check iban if the same block it
+Validator::differentFields($body,'from_iban','to_iban');
+
 //Ensure the `amount` field is a positive number.
 Validator::positiveAmount($body['amount']);
 
@@ -30,10 +33,9 @@ $from_iban= (string)$body['from_iban'];
 $to_iban= (string)$body['to_iban'];
 $amount= (float)$body['amount'];
 
-// check iban if the same block it
-if($body['from_iban'] == $body['to_iban']){
-    Json::error(422, 'from_iban and to_iban must be different' );
-}
+
+
+
 
 /**
  * Resolve sender card using IBAN
@@ -44,7 +46,7 @@ if($body['from_iban'] == $body['to_iban']){
 
 $from_cardId= CardRepository::getIdByIban($from_iban);
 if(!$from_cardId){
-    Json::error(404, 'Iban not found');
+    Json::error(404, 'from Iban not found');
 }
 
 
@@ -83,7 +85,7 @@ Json::ok(201,[
     'amount'      => $result['amount'],
     'from_iban'   => mask::iban_mask($from_iban),
     'to_iban'     => mask::iban_mask($to_iban),
-    'created_at'  => date('Y-m-d H:i:s'),
+    'created_at'  => $result['created_at'],
 ]);
 
 ?>

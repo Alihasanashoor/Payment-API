@@ -287,32 +287,32 @@ final class TransactionService{
                 * This represents money leaving the sender's card.
             */
             $insertOut=$pdo->prepare('INSERT INTO `transaction`
-            ( Card_ID, type, Amount, from_card_id, to_card_id, initiator_type, initiator_reference, Idempotency_Key, transaction_group_id
+            ( Card_ID, type, Amount, from_card_id, to_card_id, initiator_type, initiator_id, initiator_reference, Idempotency_Key, transaction_group_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)');
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)');
             
             /**
                 * Prepare statement for the INCOMING transfer.
                 * This represents money entering the receiver's card.
             */
             $insertIn=$pdo->prepare('INSERT INTO `transaction`
-            ( Card_ID, type, Amount, from_card_id, to_card_id, initiator_type, initiator_reference, Idempotency_Key, transaction_group_id
+            ( Card_ID, type, Amount, from_card_id, to_card_id, initiator_type, initiator_id, initiator_reference, Idempotency_Key, transaction_group_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)');
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)');
             
             /**
                 * Execute OUT transaction:
                 * - Card_ID = sender
                 * - type = transfer_out
             */
-            $insertOut->execute([$fromCardId, 'transfer_out', $amount, $fromCardId, $toCardId, 'USER', 'transfer', $outKey, $groupId ]);
+            $insertOut->execute([$fromCardId, 'transfer_out', $amount, $fromCardId, $toCardId, 'USER', $fromCardId, 'transfer', $outKey, $groupId ]);
             
             /**
                 * Execute IN transaction:
                 * - Card_ID = receiver
                 * - type = transfer_in
             */
-            $insertIn->execute([$toCardId, 'transfer_in', $amount, $fromCardId, $toCardId, 'USER', 'transfer',  $inKey, $groupId]);
+            $insertIn->execute([$toCardId, 'transfer_in', $amount, $fromCardId, $toCardId, 'USER', $fromCardId, 'transfer',  $inKey, $groupId]);
 
 
             /**
@@ -321,6 +321,18 @@ final class TransactionService{
                 * - Transfer is permanently recorded
             */
             $pdo->commit();
+            
+            // Fetch the creation timestamp for the transaction group.
+            // LIMIT 1 is used since the group ID uniquely identifies the record.
+            $stmt = $pdo->prepare(
+                'SELECT Created_At FROM `transaction`
+                WHERE transaction_group_id = ?
+                LIMIT 1');
+
+            // Execute the query with the provided transaction group identifier
+            $stmt->execute([$groupId]);
+            // Retrieve the Created_At value 
+            $createdAt = $stmt->fetchColumn();
 
             /**
                 * Return a clean API response
@@ -328,7 +340,8 @@ final class TransactionService{
             */
             return [
                     'transaction_group_id' => $groupId,
-                    'amount' => $amount
+                    'amount'               => $amount,
+                    'created_at'           => $createdAt,
                     ];
 
          } catch(Exception $e){
@@ -342,8 +355,12 @@ final class TransactionService{
             */
             if($pdo->inTransaction()){
                 $pdo->rollBack();
-                Json::error(500,'Transaction failed', ['details' => $e->getMessage()]);
-                return [];
+            }
+            // If the exception message indicates an insufficient balance,
+            // return a client error (422) because the request itself is valid,
+            // but cannot be processed due to business rules (not enough funds).
+            if(str_contains($e->getMessage(), 'Insufficient funds')){
+                Json::error(422, 'Insufficient funds');
             }
          }
     }

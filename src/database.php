@@ -33,6 +33,8 @@ final class database{
 
         try{
             self::$pdo = new PDO($dsn, $user, $pass, $opt);
+            # Set time zone to current
+            self::$pdo->exec("SET time_zone = '+03:00'");
             return self::$pdo;
         } catch(PDOException $e){
             /**

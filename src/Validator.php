@@ -155,10 +155,15 @@ final class Validator{
         // MIN = 3 digits, MAX = 8 digits
         if (!preg_match('/^[0-9]{3,8}$/', $link_ID)) {
         Json::error(422, 'link_id must be between 3 and 8 digits');
+        }
     }
 
-    
-}
+    public static function differentFields(array $body,string $ibanA, string $ibanB){
+        // check iban if the same block it
+        if($body[$ibanA] == $body[$ibanB]){
+        Json::error(422, "$ibanA and $ibanB must be different" );
+        }
+    }
 }
 
 ?>

@@ -11,7 +11,8 @@ def test_deposit_auth(client):
     """
     # Send a request
     response = client.get(client.base_url + "/v2/transactions/deposit")
-     # Send a request
+    
+    # Must not fail
     assert response.status_code != 401
 
 @pytest.mark.auth
@@ -34,7 +35,7 @@ def test_deposit_json(client):
 @pytest.mark.business
 def test_deposit_success(client, idempotency_key):
     """
-    deposit a valid amount from an existing card must succeed.
+    deposit a valid payload from an existing card must succeed.
     """
     # Prepare withdrawal request payload
     payload = {

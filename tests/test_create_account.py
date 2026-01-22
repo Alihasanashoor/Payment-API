@@ -212,6 +212,7 @@ def test_create_account_missing_required_field(client, missing_field,unique_emai
     """
     creating account wiht missing required fields must return 422.
     """
+    # Prepare create account request payload
     payload = {
         "Name": "Test User",
         "Phone_Number": unique_phone,
@@ -226,7 +227,77 @@ def test_create_account_missing_required_field(client, missing_field,unique_emai
     response = client.post(client.base_url + "/v2/Account/create_Account",
                            json=payload)
     
-     # Response Must fail 422 Unprocessable Content
+    # Response Must fail 422 Unprocessable Content
     # Indicating a validation error. If the assertion fails, include the raw
     assert response.status_code == 422, response.text
 
+@pytest.mark.business
+def test_create_account_duplicate_email(client, unique_phone, unique_email):
+    """
+    creating account wiht duplicate email one must return 201 & second must return 409.
+    """
+    # Prepare create account request payload
+    payload = {
+        "Name": "Test User",
+        "Phone_Number": unique_phone,
+        "email": unique_email,
+        "Link_ID": "",
+        "balance": 20.00
+    }
+
+    # Send a request
+    response = client.post(client.base_url + "/v2/Account/create_Account",
+                           json=payload)
+    
+    # First request must succeed and create the resource 201
+    assert response.status_code == 201, response.text
+
+    # Use same payload but diffrent phone number
+    payload_2 = {
+        **payload,
+        "Phone_Number": unique_email
+    }
+
+
+    # Send a request
+    response_2 = client.post(client.base_url + "/v2/Account/create_Account",
+                             json=payload)
+    
+    # Second request reusing the same email 
+    # must be rejected to prevent duplicate or conflicting operations
+    assert response_2.status_code == 409, response_2.text
+
+@pytest.mark.business
+def test_create_account_duplicate_phone_number(client, unique_email,unique_phone):
+    """
+    creating account wiht duplicate phone number one must return 201 & second must return 409.
+    """
+    # Prepare create account request payload
+    payload = {
+        "Name": "Test User",
+        "Phone_Number": unique_phone,
+        "email": unique_email,
+        "Link_ID": "",
+        "balance": 20.00
+    }
+
+    # Send a request
+    response = client.post(client.base_url + "/v2/Account/create_Account",
+                           json=payload)
+    
+    # First request must succeed and create the resource 201
+    assert response.status_code == 201, response.text
+
+    # Use same payload but diffrent email
+    payload_2 = {
+        **payload,
+        "email": unique_email
+    }
+    
+    # Send a request
+    response_2 = client.post(client.base_url + "/v2/Account/create_Account",
+                             json=payload_2)
+    
+    # Second request reusing the same email 
+    # must be rejected to prevent duplicate or conflicting operations
+    assert response_2.status_code == 409, response_2.text
