@@ -1,120 +1,69 @@
-# GitHub Actions workflow for the Payment API
-
 name: Payment API CI
 
-
-# Trigger the workflow on:
-# Direct pushes to main
-# Pull requests opened against main
-on: 
+on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
 
 jobs:
-  test: # Executes automated tests in an isolated environment to ensure code and database integrity
-    # Use the latest Ubuntu runner provided by GitHub Actions
-    runs-on:  ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-  env:
-    API_KEY: ${{ secrets.API_KEY }}
-    API_BASE_URL: ${{ secrets.API_BASE_URL }}
-    DB_HOST: ${{ secrets.DB_HOST }}
-    DB_NAME: ${{ secrets.DB_NAME }}
-    DB_USER: ${{ secrets.DB_USER }}
-    DB_PASS: ${{ secrets.DB_PASS }}
-
-  # Define dependent services required for the tests
-  # In this case, a MySQL 8.0 database for the Payment API
-  services:
-    mysql:
-      image: mysql:8:0
+    # Environment variables available to all steps in this job
     env:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: payment_test
+      API_KEY: ${{ secrets.API_KEY }}
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets.DB_PASS }}
 
-  # Expose MySQL on the default port
-  ports:
-    -3306:3306
-  
-  # Health check to ensure MySQL is fully ready
-  # before the API and tests start
-  options: >-
-    --health-cmd="mysqladmin ping -h localhost"
-    --health-interval=10s
-    --health-timeout=5s
-    --health-retries=5
-steps:
-  # Checkout the repository code
-  - name: Checkout code
-    uses: actions/checkout@v4
-  # Set up PHP environment for running the API
-  - name: Set up PHP
-    uses: shivammathur/setup-php@v2
-    with: 
-    # PHP version used by the Payment API
-      php-version: "8.2"
-    # Required PHP extensions for database access
-      extensions: pdo_mysql
-    # Disable code coverage to keep the pipeline fast
-      coverage: none
-  # Set up Python environment for pytest
-  - name: Set up Python
-    uses: actions/setup-python@v5
-    with:
-      # Python version used for API test automation
-      python-version: "3.11"
+    # Services required by the job
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: payment_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
-  # Install Python testing dependencies
-  - name: Install Python dependencies
-    run: |
-      python -m pip install --upgrade pip
-      pip install pytest requests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  # Prepare environment variables for the API
-  # Copies a safe example config into place for CI
-  - name: Configure environment
-    run: |
-      cp.env.example .env
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo_mysql
+          coverage: none
 
-  # Start the PHP built-in web server
-  # Runs in the background so pytest can send HTTP requests
-  - name: Start API
-    run: | 
-      php -S 127.0.0.1:8000 -t public > server.log 2>&1 &
-        # Give the server time to boot before running tests
-        sleep 3
-  
-  # Execute automated API tests
-  # due to many requests we split the tests.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  # Authentication tests
-  - name: Run auth tests 
-    run: | 
-      pytest -m auth
-  
-  # Create Account & student resolve tests
-  - name: account and student tests
-    run: | 
-      pytest \
-        tests/test_create_account.py \
-        tests/test_student_resolve.py
-  
-  # Transaction tests
-  - name: run transaction tests
-    run: | 
-      pytest \ 
-        tests/test_transaction_withdrawal.py \
-        tests/test_transaction_deposit.py
-  #  Transfer tests (card-to-card)
-  - name: Run transfer tests
-    run: | 
-      pytest tests/test_transfer.py
-  
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest requests
 
-        
-        
+      - name: Configure environment
+        run: |
+          cp .env.example .env
 
+      - name: Start API
+        run: |
+          php -S 127.0.0.1:8000 -t public > server.log 2>&1 &
+          sleep 3
 
-
+      - name: Run tests
+        run: |
+          pytest -m "not slow"
