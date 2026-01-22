@@ -66,6 +66,10 @@ jobs:
           DB_USER=${DB_USER}
           DB_PASS=${DB_PASS}
           EOF
+      - name: Export env vars for pytest
+        run: |
+          echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
+          echo "API_BASE_URL=http://127.0.0.1:8000" >> $GITHUB_ENV
       - name: Start API
         run: |
           php -S 127.0.0.1:8000 -t public > server.log 2>&1 &
@@ -86,7 +90,6 @@ jobs:
         run: |
           echo "===== PHP SERVER LOG ====="
           cat server.log || true
-
       - name: Run tests
         run: |
           pytest -m "not slow"
