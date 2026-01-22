@@ -62,8 +62,16 @@ jobs:
 
       - name: Start API
         run: |
-          php -S 127.0.0.1:8000 -t public > server.log 2>&1 &
-          sleep 3
+          for i in {1..15}; do
+            if curl -s http://127.0.0.1:8000/v1/ping > /dev/null; then
+              echo "API is ready"
+              exit 0
+            fi
+            echo "Waiting for API..."
+            sleep 1
+          done
+          echo "API did not start in time"
+          exit 1
 
       - name: Run tests
         run: |
