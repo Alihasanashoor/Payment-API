@@ -46,7 +46,7 @@ final class Auth{
         */
         $providedKey=$_SERVER['HTTP_X_API_KEY'] ?? '';
 
-        if($providedKey ==''){
+        if($providedKey === null){
             Json::error(401, 'Missing API key');
         }
         /**

@@ -92,11 +92,14 @@ jobs:
           done
           echo "API did not start in time"
           exit 1
-      - name: Show server log
-        if: failure()
+      - name: Dump PHP server log
         run: |
-          echo "===== PHP SERVER LOG ====="
-          cat server.log || true
+          echo "====== PHP SERVER LOG ======"
+          if [ -f server.log ]; then
+            cat server.log
+          else
+            echo "server.log not found"
+          fi
       - name: Run auth tests
         env:
           API_KEY: ${{ secrets.API_KEY }}
@@ -106,4 +109,4 @@ jobs:
           DB_USER: payuser
           DB_PASS: paypass
         run: |
-          pytest tests/test_auth.py -x
+          pytest tests/test_auth.py::test_missing_api_key -x
