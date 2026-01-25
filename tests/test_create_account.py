@@ -251,7 +251,7 @@ def test_create_account_duplicate_email(client, unique_phone, unique_email):
     
     # First request must succeed and create the resource 201
     assert response.status_code == 201, response.text
-
+ 
     # Use same payload but diffrent phone number
     payload_2 = {
         **payload,
