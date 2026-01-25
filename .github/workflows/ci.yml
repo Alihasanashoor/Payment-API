@@ -47,7 +47,8 @@ jobs:
           php-version: "8.2"
           extensions: pdo_mysql
           coverage: none
-
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
