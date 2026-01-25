@@ -38,8 +38,8 @@ def test_transfer_success(client):
     """
     # Prepare card-to-card transfer payload
     payload = {
-        "from_iban": "FAKE9b354ec1f6f511f0",
-        "to_iban": "FAKE9e2dce35f6f511f0",
+        "from_iban": "FAKEec96cd4efa0411f0",
+        "to_iban": "FAKEa0f0f6d9fa0711f0",
         "amount": 1.0
     }
 
@@ -64,8 +64,8 @@ def test_transfer_Insufficient_funds(client):
     """
     # Prepare card-to-card transfer payload
     payload = {
-        "from_iban": "FAKE67856477f46111f0",
-        "to_iban": "FAKE794a1a52ea3911f0",
+        "from_iban": "FAKEec96cd4efa0411f0",
+        "to_iban": "FAKEa0f0f6d9fa0711f0",
         "amount": 100000.00
     }
 
@@ -121,7 +121,7 @@ def test_transfer_to_iban_not_found(client):
     """
     # Prepare card-to-card transfer payload
     payload = {
-        "from_iban": "FAKE9e2dce35f6f511f0",
+        "from_iban": "FAKEa0f0f6d9fa0711f0",
         "to_iban": "NotFound67856477f46111f0",
         "amount": 5.00
     }
@@ -148,8 +148,8 @@ def test_transfer_same_iban(client):
     """
     # Prepare card-to-card transfer payload
     payload = {
-        "from_iban": "FAKE9e2dce35f6f511f0",
-        "to_iban": "FAKE9e2dce35f6f511f0",
+        "from_iban": "FAKEec96cd4efa0411f0",
+        "to_iban": "FAKEec96cd4efa0411f0",
         "amount": 5.00
     }
 
@@ -177,8 +177,8 @@ def test_transfer_invalid_amount(client, amount):
     """
     # Prepare card-to-card transfer payload
     payload = {
-        "from_iban": "FAKE9b354ec1f6f511f0",
-        "to_iban": "FAKE9e2dce35f6f511f0",
+       "from_iban": "FAKEec96cd4efa0411f0",
+        "to_iban": "FAKEa0f0f6d9fa0711f0",
         "amount": amount
     }
 
@@ -200,9 +200,9 @@ def test_transfer_invalid_amount(client, amount):
 @pytest.mark.business
 @pytest.mark.parametrize(
     "payload",[
-    {"from_iban": "FAKE9b354ec1f6f511f0", "to_iban": "FAKE9e2dce35f6f511f0"},
-    {"from_iban": "FAKE9b354ec1f6f511f0", "amount": 1.00},
-    {"to_iban": "FAKE9e2dce35f6f511f0","amount": 1.00}
+    {"from_iban": "FAKEec96cd4efa0411f0", "to_iban": "FAKE9e2dce35f6f511f0"},
+    {"from_iban": "FAKEec96cd4efa0411f0", "amount": 1.00},
+    {"to_iban": "FAKEec96cd4efa0411f0","amount": 1.00}
     ]
 )
 

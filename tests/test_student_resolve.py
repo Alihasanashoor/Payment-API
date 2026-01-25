@@ -46,7 +46,7 @@ def test_student_resolve_success(client):
     """
     # Send a request
     response = client.get(client.base_url + "/v1/students/resolve" , 
-                          params={"link_id": "001"})
+                          params={"link_id": "930"})
     
     # Request must succeed with HTTP 200 OK 
     assert response.status_code == 200
@@ -59,7 +59,7 @@ def test_student_resolve_success(client):
 
     # resolved student must include a link_id field and same user that was asked for "001"
     assert "link_id" in data
-    assert data["link_id"] == "001"
+    assert data["link_id"] == "930"
 
 @pytest.mark.business
 def test_student_resolve_not_found(client):

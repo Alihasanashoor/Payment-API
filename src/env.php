@@ -5,6 +5,7 @@ declare(strict_types=1); // enable strict types (catches type mistakes)
 
 $env= __DIR__.'/../.env'; // Path to the .env file
 
+
 if(file_exists($env)){
     foreach(file($env, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line){
         //Trim whitespace
@@ -32,11 +33,14 @@ if(file_exists($env)){
          // Clean spaces around KEY and VALUE
          [$key, $value]= array_map('trim',$pair);
 
-          /**
+        /**
          * putenv("KEY=VALUE") writes into the current PHP process environment.
          * Later we can read it anywhere via getenv('KEY').
-         */
+        */
+        if(getenv($key) === false){
         putenv("$key=$value");
+        }
+    
 
     }
 }

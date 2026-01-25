@@ -167,7 +167,8 @@ final class Auth{
         $stmt->execute([$apikeyID, $windowStart]);
 
         $count=(int)$stmt->fetchColumn();
-
+            
+        if(getenv('APP_ENV') !== 'test')
         if($count > SELF::RATE_LIMIT){
             Json::error(429, 'Too many requests, please try again later');
         }

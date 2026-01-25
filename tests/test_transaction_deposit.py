@@ -39,7 +39,7 @@ def test_deposit_success(client, idempotency_key):
     """
     # Prepare withdrawal request payload
     payload = {
-        "card_id"           : 948,
+        "card_id"           : 990,
         "Amount"            : 5.00,
         "product"           : "TEST deposit",
         "idempotency_key"   : f"deposit-success-{idempotency_key}"
@@ -95,7 +95,7 @@ def test_deposit_invalid_amount(client,Amount):
     """
     # Prepare deposit request payload
     payload = {
-        "card_id"           : 948,
+        "card_id"           :  990,
         "Amount"            : Amount,
         "product"           : "TEST Withdrawal",
         "idempotency_key"   : "withdraw-test4-"
@@ -118,7 +118,7 @@ def test_deposit_Insufficient_funds(client, amount):
     """
     # Prepare withdrawal request payload
     payload = {
-        "card_id": 948,
+        "card_id":  990,
         "Amount": amount,
         "product": "ATM Withdrawal",
         "idempotency_key": "withdraw-insufficient-funds"
@@ -167,7 +167,7 @@ def test_deposit_idempotency(client, idempotency_key):
     """
     idem = idempotency_key
     payload = {
-        "card_id": 948 ,
+        "card_id":  990 ,
         "Amount": 1.00,
         "product": "Deposit test",
         "idempotency_key": f"deposit-{idem}"
@@ -208,14 +208,14 @@ def test_deposit_idempotency_different_payload_same_idempotency_key(client, idem
     """
     idem = idempotency_key
     Frist_payload = {
-        "card_id": 948 ,
+        "card_id":  990 ,
         "Amount": 1.00,
         "product": "test-Deposit-new-idempotency_key",
         "idempotency_key": idem
     }
 
     Second_payload = {
-        "card_id": 948 ,
+        "card_id":  990 ,
         "Amount": 50.00,
         "product": "test-Deposit-same-idempotency_key",
         "idempotency_key": idem
