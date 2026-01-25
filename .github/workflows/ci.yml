@@ -87,6 +87,9 @@ jobs:
         run: |
           echo "===== PHP SERVER LOG ====="
           cat server.log || true
+      - name: Export API key for pytest
+        run: |
+          echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
       - name: Run tests
         run: |
-          pytest -m "not slow"
+          pytest tests/test_auth.py -x
