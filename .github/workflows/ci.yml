@@ -110,4 +110,4 @@ jobs:
           DB_USER: payuser
           DB_PASS: paypass
         run: |
-          pytest pytest tests/test_create_account.py::test_create_account_success_with_Link_ID -x
+          pytest tests/test_create_account.py::test_create_account_success_with_Link_ID -x
