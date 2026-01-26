@@ -127,6 +127,9 @@ final class TransactionService{
                 if($pdo->inTransaction()){
                     $pdo->rollBack();
                 }
+                if ($e->getCode() === '45000') {
+                    Json::error(422, $e->getMessage());
+                }
                 // If the exception message indicates an insufficient balance,
                 // return a client error (422) because the request itself is valid,
                 // but cannot be processed due to business rules (not enough funds).
@@ -239,6 +242,9 @@ final class TransactionService{
                 if($pdo->inTransaction()){
                     $pdo->rollBack();                
                 }
+                if ($e->getCode() === '45000') {
+                    Json::error(422, $e->getMessage());
+                }
                 // If the exception message indicates an insufficient balance,
                 // return a client error (422) because the request itself is valid,
                 // but cannot be processed due to business rules (not enough funds).
@@ -305,14 +311,14 @@ final class TransactionService{
                 * - Card_ID = sender
                 * - type = transfer_out
             */
-            $insertOut->execute([$fromCardId, 'transfer_out', $amount, $fromCardId, $toCardId, 'USER', $fromCardId, 'transfer', $outKey, $groupId ]);
+            $insertOut->execute([$fromCardId, 'transfer_out', $amount, $fromCardId, $toCardId, 'User', $fromCardId, 'transfer', $outKey, $groupId ]);
             
             /**
                 * Execute IN transaction:
                 * - Card_ID = receiver
                 * - type = transfer_in
             */
-            $insertIn->execute([$toCardId, 'transfer_in', $amount, $fromCardId, $toCardId, 'USER', $fromCardId, 'transfer',  $inKey, $groupId]);
+            $insertIn->execute([$toCardId, 'transfer_in', $amount, $fromCardId, $toCardId, 'User', $fromCardId, 'transfer',  $inKey, $groupId]);
 
 
             /**

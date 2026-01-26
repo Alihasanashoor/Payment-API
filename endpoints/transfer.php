@@ -26,8 +26,17 @@ Validator::required($body,['from_iban', 'to_iban', 'amount']);
 Validator::differentFields($body,'from_iban','to_iban');
 
 //Ensure the `amount` field is a positive number.
-Validator::positiveAmount($body['amount']);
-
+// Normalize empty string → NULL
+        $linkId = ($linkId === '') ? null : $linkId;
+        // Check for duplicate phone number to enforce account uniqueness.
+        if($linkId !== null && $linkId !== ''){
+        $Link_ID_Check = $pdo->prepare('SELECT * FROM accounts WHERE Link_ID = ? LIMIT 1');
+        $Link_ID_Check->execute([$linkId]);
+        // If a record is found, reject the request to prevent duplicate accounts.
+        if($Link_ID_Check->fetch()){
+            Json::error(409, 'Link_ID already exists');
+            }
+        }
 //Cast each field into the correct PHP type for safety.
 $from_iban= (string)$body['from_iban'];
 $to_iban= (string)$body['to_iban'];

@@ -8,7 +8,7 @@ final class Account{
     public static function CreateAccount(
         string $Name,
         string $Phone_Number,
-        string $emali,
+        string $email,
         ?string $linkId,
         float $balance
     ){
@@ -27,13 +27,15 @@ final class Account{
         }
         // Check for duplicate email address to enforce unique account identity.
         $emaliCheck = $pdo->prepare('SELECT * FROM accounts WHERE email  = ? LIMIT 1');
-        $emaliCheck->execute([$emali]);
+        $emaliCheck->execute([$email]);
 
         // If a record is found, reject the request to prevent duplicate accounts.
         if($emaliCheck->fetch()){
             // HTTP 409 Conflict indicates a resource uniqueness violation.
             Json::error(409, 'Email already exists');
         }
+        // Normalize empty string → NULL
+        $linkId = ($linkId === '') ? null : $linkId;
         // Check for duplicate phone number to enforce account uniqueness.
         if($linkId !== null){
         $Link_ID_Check = $pdo->prepare('SELECT * FROM accounts WHERE Link_ID = ? LIMIT 1');
@@ -51,7 +53,7 @@ final class Account{
             $insert= $pdo->prepare('INSERT INTO `accounts`
             (`Name`, `Phone_Number`, `email`, `Link_ID`)
             VALUES (?,?,?,?)');
-            $insert->execute([$Name, $Phone_Number, $emali, $linkId]);
+            $insert->execute([$Name, $Phone_Number, $email, $linkId]);
 
             // Return the auto-increment Account_ID
             $AccountID = (int) $pdo->lastInsertId();
@@ -103,7 +105,10 @@ final class Account{
             if($pdo->inTransaction()){
                 $pdo->rollBack();
             }
-            Json::error(500, 'failed to create account');
+             Json::error(500, 'failed to create account', [
+                'sql_error' => $e->getMessage(),
+                'code' => $e->getCode()
+    ]);
         }
 
     }
