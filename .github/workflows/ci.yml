@@ -110,4 +110,4 @@ jobs:
           DB_USER: payuser
           DB_PASS: paypass
         run: |
-          pytest tests/test_auth.py::test_missing_api_key -x
+          pytest -m "not slow""
