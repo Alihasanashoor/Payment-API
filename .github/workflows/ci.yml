@@ -110,4 +110,4 @@ jobs:
           DB_USER: payuser
           DB_PASS: paypass
         run: |
-          pytest -m "not slow""
+          pytest -m "not slow"
