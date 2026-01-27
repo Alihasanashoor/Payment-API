@@ -138,14 +138,16 @@ final class TransactionService{
 
                     error_log("Stack Trace: " . $e->getTraceAsString());
                     error_log("===== END ERROR =====");
+                     // Temporarily return the actual error for debugging
+                Json::error(500, "Error: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+              
+                    */
     
                 // check if there active database transaction right now
                 if($pdo->inTransaction()){
                     $pdo->rollBack();
                 }
-                // Temporarily return the actual error for debugging
-                Json::error(500, "Error: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
-                */
+                 
                 
                 
                 if ($e->getCode() === '45000') {
@@ -262,9 +264,28 @@ final class TransactionService{
                 ];
 
             } catch(Exception $e){
+                    error_log("===== ACTUAL ERROR =====");
+                    error_log("Message: " . $e->getMessage());
+                    error_log("Code: " . $e->getCode());
+                    error_log("File: " . $e->getFile() . ":" . $e->getLine());
+
+                    if($e instanceof PDOException){
+                        error_log("PDO Error Info: " . json_encode($e->errorInfo));
+                        error_log("SQLSTATE: " . $e->errorInfo[0]);
+                        error_log("Driver Code: " . $e->errorInfo[1]);
+                        error_log("Driver Message: " . $e->errorInfo[2]);
+                    }
+
+                    error_log("Stack Trace: " . $e->getTraceAsString());
+                    error_log("===== END ERROR =====");
+
                 if($pdo->inTransaction()){
                     $pdo->rollBack();                
                 }
+                // Temporarily return the actual error for debugging
+                Json::error(500, "Error: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+                
+                /*
                 if ($e->getCode() === '45000') {
                     Json::error(422, $e->getMessage());
                 }
@@ -278,6 +299,7 @@ final class TransactionService{
                 // This prevents leaking sensitive error details (DB errors, stack traces, etc)
                 // and keeps the API consistent and secure.
                 Json::error(500, 'Transaction failed');
+                /*
                 
             }
     }
