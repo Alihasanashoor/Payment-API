@@ -123,12 +123,32 @@ final class TransactionService{
                     'Idempotency_key'  =>$row['Idempotency_Key']
                 ];
             } catch(Exception $e){
+                // DEBUG: Log the actual error
+                    error_log("===== ACTUAL ERROR =====");
+                    error_log("Message: " . $e->getMessage());
+                    error_log("Code: " . $e->getCode());
+                    error_log("File: " . $e->getFile() . ":" . $e->getLine());
+
+                    if($e instanceof PDOException){
+                        error_log("PDO Error Info: " . json_encode($e->errorInfo));
+                        error_log("SQLSTATE: " . $e->errorInfo[0]);
+                        error_log("Driver Code: " . $e->errorInfo[1]);
+                        error_log("Driver Message: " . $e->errorInfo[2]);
+                    }
+
+                    error_log("Stack Trace: " . $e->getTraceAsString());
+                    error_log("===== END ERROR =====");
+    
                 // check if there active database transaction right now
                 if($pdo->inTransaction()){
                     $pdo->rollBack();
                 }
-                if ($e->getCode() === '45000') {
-                    Json::error(422, $e->getMessage());
+                // Temporarily return the actual error for debugging
+                Json::error(500, "Error: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+                
+                /*
+                 if ($e->getCode() === '45000') {
+                  Json::error(422, $e->getMessage());
                 }
                 // If the exception message indicates an insufficient balance,
                 // return a client error (422) because the request itself is valid,
@@ -139,7 +159,9 @@ final class TransactionService{
                 // Any other exception is treated as an internal system failure.
                 // This prevents leaking sensitive error details (DB errors, stack traces, etc)
                 // and keeps the API consistent and secure.
-                Json::error(500, 'Transaction failed');
+                Json::error(500, 'Transaction failed'); 
+                */
+                
             }
 
 
