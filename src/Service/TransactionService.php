@@ -123,7 +123,7 @@ final class TransactionService{
                     'Idempotency_key'  =>$row['Idempotency_Key']
                 ];
             } catch(Exception $e){
-                // DEBUG: Log the actual error
+                /* DEBUG: Log the actual error
                     error_log("===== ACTUAL ERROR =====");
                     error_log("Message: " . $e->getMessage());
                     error_log("Code: " . $e->getCode());
@@ -145,9 +145,10 @@ final class TransactionService{
                 }
                 // Temporarily return the actual error for debugging
                 Json::error(500, "Error: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+                */
                 
-                /*
-                 if ($e->getCode() === '45000') {
+                
+                if ($e->getCode() === '45000') {
                   Json::error(422, $e->getMessage());
                 }
                 // If the exception message indicates an insufficient balance,
@@ -160,7 +161,7 @@ final class TransactionService{
                 // This prevents leaking sensitive error details (DB errors, stack traces, etc)
                 // and keeps the API consistent and secure.
                 Json::error(500, 'Transaction failed'); 
-                */
+                
                 
             }
 
