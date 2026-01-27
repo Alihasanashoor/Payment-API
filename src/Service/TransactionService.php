@@ -229,7 +229,7 @@ final class TransactionService{
                 // telling MySQL: “I’m starting a transaction — don’t finalize changes until I say so.”
                 $pdo->beginTransaction();
                 // Serch for the card_id if not found return 404 status code
-                $card_check =$pdo->prepare('SELECT FROM card WHERE Card_ID =? FOR UPDATE');
+                $card_check =$pdo->prepare('SELECT * FROM card WHERE Card_ID =? FOR UPDATE');
                 $card_check->execute([$cardId]);
                 $card = $card_check->fetch();
                 if(!$card){
