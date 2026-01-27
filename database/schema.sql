@@ -138,7 +138,7 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `IBAN_GEN` BEFORE INSERT ON `card` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50003 TRIGGER `IBAN_GEN` BEFORE INSERT ON `card` FOR EACH ROW BEGIN
     IF NEW.iban IS NULL OR NEW.iban = '' THEN
         SET NEW.iban = CONCAT(
             'FAKE',
@@ -164,7 +164,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`payuser`@`localhost`*/ /*!50003 TRIGGER `bi_card_gentate_number` BEFORE INSERT ON `card` FOR EACH ROW SET NEW.card_number =
+/*!50003 CREATE*/ /*!50003 TRIGGER `bi_card_gentate_number` BEFORE INSERT ON `card` FOR EACH ROW SET NEW.card_number =
 CONCAT(
     FLOOR(1 + RAND() * 9),
     LPAD(FLOOR(RAND() * 1000000000000000), 15, '0')
@@ -227,7 +227,7 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`payuser`@`localhost`*/ /*!50003 TRIGGER `transaction_balance` BEFORE INSERT ON `transaction` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50003 TRIGGER `transaction_balance` BEFORE INSERT ON `transaction` FOR EACH ROW BEGIN
     DECLARE current_balance DECIMAL(12,2);
 
     IF NEW.Transaction_ID IS NULL OR NEW.Transaction_ID = '' THEN
