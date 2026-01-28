@@ -105,19 +105,4 @@ jobs:
         run: |
           pytest 
 
-      - name: Dump PHP server log
-        if: always()
-        run: |
-          echo "====== PHP SERVER LOG ======"
-          if [ -f server.log ]; then
-            cat server.log
-          else
-            echo "server.log not found"
-          fi
-      - name: Dump MySQL logs
-        if: always()
-        run: |
-          echo "====== MYSQL LOG ======"
-          docker ps
-          docker logs ${{ job.services.mysql.id }} || true
 
