@@ -371,35 +371,17 @@ final class TransactionService{
                 * - Return a consistent API error
             */
 
-            error_log("===== ACTUAL ERROR =====");
-                    error_log("Message: " . $e->getMessage());
-                    error_log("Code: " . $e->getCode());
-                    error_log("File: " . $e->getFile() . ":" . $e->getLine());
-
-                    if($e instanceof PDOException){
-                        error_log("PDO Error Info: " . json_encode($e->errorInfo));
-                        error_log("SQLSTATE: " . $e->errorInfo[0]);
-                        error_log("Driver Code: " . $e->errorInfo[1]);
-                        error_log("Driver Message: " . $e->errorInfo[2]);
-                    }
-
-                    error_log("Stack Trace: " . $e->getTraceAsString());
-                    error_log("===== END ERROR =====");
-
                 if($pdo->inTransaction()){
                     $pdo->rollBack();                
-                }
-                // Temporarily return the actual error for debugging
-                Json::error(500, "Error: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
-                
+                }                
                 
             
             // If the exception message indicates an insufficient balance,
             // return a client error (422) because the request itself is valid,
             // but cannot be processed due to business rules (not enough funds).
-           /* if(str_contains($e->getMessage(), 'Insufficient funds')){
+            if(str_contains($e->getMessage(), 'Insufficient funds')){
                 Json::error(422, 'Insufficient funds');
-            }*/
+            }
          }
     }
 
