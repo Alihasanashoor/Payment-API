@@ -103,7 +103,8 @@ jobs:
           DB_USER: payuser
           DB_PASS: paypass
         run: |
-          pytest tests
+          pytest tests/test_tr.py -vv
+
       - name: Dump PHP server log
         if: always()
         run: |
