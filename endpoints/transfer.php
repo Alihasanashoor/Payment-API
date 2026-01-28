@@ -25,6 +25,9 @@ Validator::required($body,['from_iban', 'to_iban', 'amount']);
 // check iban if the same block it
 Validator::differentFields($body,'from_iban','to_iban');
 
+//Ensure the `balance` field is a positive number
+Validator::positiveAmount($body['amount']);
+
 //Cast each field into the correct PHP type for safety.
 $from_iban= (string)$body['from_iban'];
 $to_iban= (string)$body['to_iban'];
