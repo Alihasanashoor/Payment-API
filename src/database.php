@@ -10,6 +10,7 @@ final class database{
     private static ?PDO $pdo=null;
 
     public static function pdo(): PDO{ 
+
         //Reuse if already created
         if(self::$pdo) return self::$pdo;
         
@@ -44,7 +45,7 @@ final class database{
             * - prod → hide internals (security)
             */
             $env = getenv('APP_ENV')?: 'prod';
-            if($env == 'dev'){
+            if($env === 'local'){
                 Json::error(500, 'DB connection failed', ['details' => $e->getMessage()]);
             }
             // Production-safe error

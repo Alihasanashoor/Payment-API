@@ -1,0 +1,44 @@
+# Git
+.git
+.github
+
+# Environment
+.env
+.env.test
+
+
+# Tests & CI artifacts
+tests
+.pytest_cache
+coverage
+htmlcov
+
+
+# Python junk (pytest, venv)
+venv
+__pycache__
+
+
+# PHP vendor (installed inside container)
+vendor
+
+# Docs & non-runtime files
+
+api-docs
+pytest.ini
+requirements.txt
+
+
+# OS / editor junk
+.DS_Store
+.idea
+.vscode
+
+
+# Test local DB
+test_db.php
+
+# Docker artifacts
+docker-compose.yml
+Dockerfile
+

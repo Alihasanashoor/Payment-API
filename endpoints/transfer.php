@@ -33,10 +33,6 @@ $from_iban= (string)$body['from_iban'];
 $to_iban= (string)$body['to_iban'];
 $amount= (float)$body['amount'];
 
-
-
-
-
 /**
  * Resolve sender card using IBAN
  * ------------------------------

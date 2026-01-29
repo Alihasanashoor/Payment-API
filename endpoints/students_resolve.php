@@ -34,8 +34,8 @@ if ($result === null || empty($result['card_id'])) {
 //if Success return HTTP 200 OK with normalized JSON payload.
 
 Json::ok(200,[
-    'account_id' => $result['account_id'],
-    'card_id'    => $result['card_id'],
+    'card_number'=> $result['card_number'],
+    'iban'       =>  $result['iban'],
     'balance'    => $result['balance'],
     'link_id'    => $result['link_id'], 
 ]);

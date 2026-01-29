@@ -25,3 +25,7 @@ __pycache__/
 
 # temp, its not ready yet 
 public/docs/
+
+
+# Test local DB
+test_db.php

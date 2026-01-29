@@ -23,10 +23,10 @@ final class StudentService{
         // 5. Limit to 1 result.
         $start=$pdo->prepare
         (  'SELECT
-        a.`Account_ID` AS account_id,
-        a.`Link_ID`    AS link_id,
-        c.`Card_ID`    AS card_id,
-        c.`Balance`    AS balance
+        a.`Link_ID`     AS link_id,
+        c.`card_number`AS card_number,
+        c.`iban`        AS iban,
+        c.`Balance`     AS balance
         FROM `accounts` AS a
         JOIN `card` AS c ON c.`Account_ID` = a.`Account_ID`
         WHERE a.`Link_ID` = :link
@@ -48,11 +48,11 @@ final class StudentService{
 
         //convert values into strict PHP types
         // This makes sure the API response or service return value has predictable types.
-        return[
-            'account_id' => (int)$row['account_id'],
-            'card_id'    => (int)$row['card_id'],
-            'balance'    => (float)$row['balance'],
-            'link_id'    => (string)$row['link_id']
+       return [
+            'card_number' => (string)$row['card_number'],
+            'iban'        => (string)$row['iban'],
+            'balance'     => (float)$row['balance'],
+            'link_id'     => (string)$row['link_id'],
         ];
         
 

@@ -3,10 +3,17 @@
 
 declare(strict_types=1); // enable strict types (catches type mistakes)
 
-$env= __DIR__.'/../.env'; // Path to the .env file
 
 
-if(file_exists($env)){
+
+// Detect Docker 
+$appEnv = getenv('APP_ENV') ?: 'local';
+
+if ($appEnv === 'local') {
+    $env = __DIR__ . '/../.env';
+
+
+if(is_file($env)){
     foreach(file($env, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line){
         //Trim whitespace
         $line=trim($line);
@@ -40,7 +47,7 @@ if(file_exists($env)){
         if(getenv($key) === false){
         putenv("$key=$value");
         }
-    
+    }
 
     }
 }

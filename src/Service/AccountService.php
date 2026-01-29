@@ -94,6 +94,7 @@ final class Account{
                 // card information
                 'card' =>[
                     'card_number'    =>    $card_row['card_number'],
+                    'iban'           =>    $card_row['iban'],
                     'Balance'        =>    $card_row['Balance'],
                 ]
             ];

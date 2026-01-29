@@ -26,7 +26,6 @@ require_once __DIR__ . '/../src/Validator.php';     //input validation helpers
 require_once __DIR__ . '/../src/Service/TransactionService.php';    //business logic (transactions, student lookup, etc.)
 require_once __DIR__ . '/../src/Service/StudentService.php';    
 require_once __DIR__ . '/../src/Service/AccountService.php';    
-require_once __DIR__ . '/../src/Service/TransactionServiceV1.php';
 
 use App\Json;
 use App\Core\Kernel;
@@ -86,21 +85,6 @@ if($method =='GET' && $path=='/v1/students/resolve'){
     exit;
 }
 
-/**
- * WITHDRAW (V1)
- * -------------
- * Academic Registration System withdrawal endpoint.
- * Triggered when a student clicks "Pay" for a course.
- *
- * Uses:
- * - Student resolution
- * - Idempotency protection
- * - Database triggers for balance updates
- */
-if($method == 'POST' && $path =='/v1/transactions/withdraw'){
-    require __DIR__ . '/../endpoints/AcademicRegistrationSystem_Withdraw.php';
-    exit;
-}
 
 /**
  * WITHDRAW (V2)
