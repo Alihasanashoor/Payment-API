@@ -1,7 +1,7 @@
 import pytest
 
 # Import Shared variables for business-rule tests
-from conftest import INVALID_AMOUNTS, MISSING_REQUIRED_FIELDS
+from conftest import INVALID_AMOUNTS, DEPOSIT_MISSING_REQUIRED_FIELDS
 
 @pytest.mark.auth
 def test_deposit_auth(client):
@@ -41,7 +41,6 @@ def test_deposit_success(client, idempotency_key):
     payload = {
         "card_number"       : "6397554063608454",
         "Amount"            : 5.00,
-        "product"           : "TEST deposit",
         "idempotency_key"   : f"deposit-success-{idempotency_key}"
     }   
     # Send a request
@@ -65,7 +64,6 @@ def test_deposit_not_found(client):
     payload = {
         "card_number"       : "0000000000000000",
         "Amount"            : 5.00,
-        "product"           : "TEST deposit",
         "idempotency_key"   : "deposit-test-not-found"
     }
     # Send a request
@@ -97,7 +95,6 @@ def test_deposit_invalid_amount(client,Amount):
     payload = {
         "card_number"       : "6397554063608454",
         "Amount"            : Amount,
-        "product"           : "TEST Withdrawal",
         "idempotency_key"   : "withdraw-test4-"
     }
     # Send a request
@@ -120,7 +117,6 @@ def test_deposit_Insufficient_funds(client, amount):
     payload = {
         "card_number"       : "6397554063608454",
         "Amount": amount,
-        "product": "ATM Withdrawal",
         "idempotency_key": "withdraw-insufficient-funds"
     }
     # Send a request
@@ -140,7 +136,7 @@ def test_deposit_Insufficient_funds(client, amount):
 
 @pytest.mark.business
 # Run the same test multiple times with different inputs.
-@pytest.mark.parametrize("payload", MISSING_REQUIRED_FIELDS)
+@pytest.mark.parametrize("payload", DEPOSIT_MISSING_REQUIRED_FIELDS)
 
 def test_deposit_missing_required_fields(client, payload):
     """
@@ -169,7 +165,6 @@ def test_deposit_idempotency(client, idempotency_key):
     payload = {
         "card_number": "6397554063608454",
         "Amount": 1.00,
-        "product": "Deposit test",
         "idempotency_key": f"deposit-{idem}"
     }
 
@@ -210,14 +205,12 @@ def test_deposit_idempotency_different_payload_same_idempotency_key(client, idem
     Frist_payload = {
         "card_number": "6397554063608454",
         "Amount": 1.00,
-        "product": "test-Deposit-new-idempotency_key",
         "idempotency_key": idem
     }
 
     Second_payload = {
         "card_number": "6397554063608454",
         "Amount": 50.00,
-        "product": "test-Deposit-same-idempotency_key",
         "idempotency_key": idem
     }
     

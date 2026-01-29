@@ -3,7 +3,7 @@ import pytest
 
 
 # Import Shared variables for business-rule tests
-from conftest import INVALID_AMOUNTS, MISSING_REQUIRED_FIELDS, idempotency_key
+from conftest import INVALID_AMOUNTS, WITHDRAWAL_MISSING_REQUIRED_FIELDS
 
 @pytest.mark.auth
 def test_withdrawal_auth(client):
@@ -119,7 +119,7 @@ def test_withdrawal_invalid_amount(client, Amount):
 @pytest.mark.business
 # Run the same test multiple times with different inputs.
 @pytest.mark.parametrize(
-    "payload",MISSING_REQUIRED_FIELDS)
+    "payload", WITHDRAWAL_MISSING_REQUIRED_FIELDS)
 
 def test_withdrawal_missing_required_fields(client, payload):
     """

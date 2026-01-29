@@ -44,7 +44,7 @@ $headers = function_exists('getallheaders') ? getallheaders(): [];
 
 //Ensure all required fields are present in the request.
 //If any are missing, Validator::required() will stop and return HTTP 422.
-Validator::required($body,['card_number','Amount', 'product', 'idempotency_key']);
+Validator::required($body,['card_number','Amount', 'idempotency_key']);
 
 // Ensure the `amount` is positive number.
 Validator::positiveAmount($body['Amount']);
@@ -57,7 +57,6 @@ Validator::idempotencykey($body['idempotency_key']);
 // Cast each field into the correct PHP type for safety.
 $CardNumber =(string)$body['card_number'];
 $amount =(float)$body['Amount'];
-$product =(string)$body['product'];
 $idemkey= (string) $body['idempotency_key'];
 
 /**
@@ -72,7 +71,7 @@ if(!$card_number){
 }
 
 // This calls TransactionService::deposit(), which interacts with the DB.
-$result = TransactionService::deposit($card_number, $product, $idemkey, $amount );
+$result = TransactionService::deposit($card_number, $idemkey, $amount );
 
 //Decide which HTTP status code to return, based on the result:
 //status comes from the database trigger (usually success)
@@ -84,7 +83,6 @@ if(($result['status'] ?? null) == 'success'){
     'card_number'   =>  mask::iban_mask($CardNumber),
     'type'          =>  $result['type'],
     'Balance_After' =>  $result['Balance_After'],
-    'Product'       =>  $result['Product'],
     'created_at'    =>  $result['created_at'],
 ]);
 }

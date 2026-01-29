@@ -8,13 +8,17 @@ import random
 INVALID_AMOUNTS = [0 ,-1.00, -10.5]
 
 # Shared missing required fields for business-rule tests
-MISSING_REQUIRED_FIELDS = [
+WITHDRAWAL_MISSING_REQUIRED_FIELDS = [
         {"Amount":1.00, "product": "TEST", "idempotency_key": "missing-card_number"},
         {"card_number": 932, "product": "TEST", "idempotency_key": "missing-amount"},
         {"card_number": 932, "Amount": 1.00, "idempotency_key": "missing-product"},
         {"card_number": 932, "Amount": 1.00, "product": "missing-idem"},
         ]
-
+DEPOSIT_MISSING_REQUIRED_FIELDS = [
+    {"Amount": 1.00, "idempotency_key": "missing-card_number"},
+    {"card_number": 932, "idempotency_key": "missing-amount"},
+    {"card_number": 932, "Amount": 1.00},  # missing idempotency
+]
 
 @pytest.fixture
 def unique_email(): 

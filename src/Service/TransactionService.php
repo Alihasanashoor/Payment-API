@@ -153,7 +153,6 @@ final class TransactionService{
 
     public static function deposit(
             int $cardId,
-            string $product,
             string $idemkey,
             float $Amount_send,
             
@@ -175,7 +174,6 @@ final class TransactionService{
                     json_encode([
                         'card_id' => $cardId,
                         'Amount'  => $Amount_send,
-                        'product' => $product,
                         'type'    => 'deposit'
                     ],
                     // Throw an exception if JSON encoding fails to avoid hashing invalid data
@@ -207,7 +205,6 @@ final class TransactionService{
                             'idempotent'     => true,
                             'Transaction_ID' => $existing['Transaction_ID'],
                             'type'           => $existing['type'],
-                            'Product'        => $existing['Product'],
                             'amount'         => (float)$existing['Amount'],
                             'Balance_After'  => (float)$existing['Balance_After'],
                             'created_at'     => $existing['Created_At'],
@@ -221,9 +218,9 @@ final class TransactionService{
                 $pdo->beginTransaction();
                 
                 $insert=$pdo->prepare(' INSERT INTO `transaction`
-                (`Card_ID`, `Product`, `Amount`, `type`,`Idempotency_Key`, `payload_hash`)
-                VALUES (?, ?, ?, ?,?, ?)');
-                $insert->execute([$cardId, $product,$Amount_send,'deposit', $idemkey, $payloadHash]);
+                (`Card_ID`, `Amount`, `type`,`Idempotency_Key`, `payload_hash`)
+                VALUES (?, ?, ?,?, ?)');
+                $insert->execute([$cardId, $Amount_send,'deposit', $idemkey, $payloadHash]);
                 
                 
                 // Return the auto-increment ID of the last inserted row in this connection.
@@ -237,7 +234,6 @@ final class TransactionService{
                     'status'          => 'success',
                     'Transaction_ID'  => $row['Transaction_ID'],
                     'type'            => $row['type'],
-                    'Product'         => $row['Product'],
                     'amount'          => (float)$row['Amount'],
                     'Balance_After'   => (float)$row['Balance_After'],
                     'created_at'      => $row['Created_At'],
