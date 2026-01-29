@@ -29,7 +29,7 @@ if ($result === null) {
     exit;
 }
 
-
+ 
 
 //if Success return HTTP 200 OK with normalized JSON payload.
 
