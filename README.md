@@ -424,3 +424,26 @@ Environment Notes
 - When running locally, the API can connect to a local MySQL instance using DB_HOST=127.0.0.1
 
 - The same codebase works in both environments without modification
+
+## 📚 What This Project Demonstrates
+
+- Backend-focused API design
+
+- Financial-style transactional workflows
+
+- Database-first integrity enforcement
+
+- Secure authentication patterns
+
+- Automated testing and CI
+
+- Clean, maintainable PHP architecture
+
+
+⚠️ Disclaimer
+
+This project is for educational and demonstration purposes only.
+
+- No real money
+
+- No real payment networks
