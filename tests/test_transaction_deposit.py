@@ -39,7 +39,7 @@ def test_deposit_success(client, idempotency_key):
     """
     # Prepare withdrawal request payload
     payload = {
-        "card_id"           : 990,
+        "card_number"       : "6397554063608454",
         "Amount"            : 5.00,
         "product"           : "TEST deposit",
         "idempotency_key"   : f"deposit-success-{idempotency_key}"
@@ -63,7 +63,7 @@ def test_deposit_not_found(client):
     """
     # Prepare withdrawal request payload
     payload = {
-        "card_id"           : 9999,
+        "card_number"       : "0000000000000000",
         "Amount"            : 5.00,
         "product"           : "TEST deposit",
         "idempotency_key"   : "deposit-test-not-found"
@@ -83,7 +83,7 @@ def test_deposit_not_found(client):
     assert "error" in data
 
     # Assert correct error message
-    assert data["error"] == "Card not found"
+    assert data["error"] == "card number not found"
 
 @pytest.mark.business
 # Run the same test multiple times with different inputs.
@@ -95,7 +95,7 @@ def test_deposit_invalid_amount(client,Amount):
     """
     # Prepare deposit request payload
     payload = {
-        "card_id"           :  990,
+        "card_number"       : "6397554063608454",
         "Amount"            : Amount,
         "product"           : "TEST Withdrawal",
         "idempotency_key"   : "withdraw-test4-"
@@ -118,7 +118,7 @@ def test_deposit_Insufficient_funds(client, amount):
     """
     # Prepare withdrawal request payload
     payload = {
-        "card_id":  990,
+        "card_number"       : "6397554063608454",
         "Amount": amount,
         "product": "ATM Withdrawal",
         "idempotency_key": "withdraw-insufficient-funds"
@@ -167,7 +167,7 @@ def test_deposit_idempotency(client, idempotency_key):
     """
     idem = idempotency_key
     payload = {
-        "card_id":  990 ,
+        "card_number": "6397554063608454",
         "Amount": 1.00,
         "product": "Deposit test",
         "idempotency_key": f"deposit-{idem}"
@@ -208,14 +208,14 @@ def test_deposit_idempotency_different_payload_same_idempotency_key(client, idem
     """
     idem = idempotency_key
     Frist_payload = {
-        "card_id":  990 ,
+        "card_number": "6397554063608454",
         "Amount": 1.00,
         "product": "test-Deposit-new-idempotency_key",
         "idempotency_key": idem
     }
 
     Second_payload = {
-        "card_id":  990 ,
+        "card_number": "6397554063608454",
         "Amount": 50.00,
         "product": "test-Deposit-same-idempotency_key",
         "idempotency_key": idem

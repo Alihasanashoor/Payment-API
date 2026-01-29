@@ -5,7 +5,9 @@ declare(strict_types=1);
 use App\Auth;
 use App\Validator;
 use App\Json;
+use App\Repository\CardRepository;
 use App\TransactionService;
+use App\Util\mask;
 
 
 
@@ -42,7 +44,7 @@ $headers = function_exists('getallheaders') ? getallheaders(): [];
 
 //Ensure all required fields are present in the request.
 //If any are missing, Validator::required() will stop and return HTTP 422.
-Validator::required($body,['card_id','Amount', 'product', 'idempotency_key']);
+Validator::required($body,['card_number','Amount', 'product', 'idempotency_key']);
 
 // Ensure the `amount` is positive number.
 Validator::positiveAmount($body['Amount']);
@@ -50,23 +52,41 @@ Validator::positiveAmount($body['Amount']);
 //ensure that idempotency_key exists, also enforces a max length (64 chars)
 Validator::idempotencykey($body['idempotency_key']);
 
-// Ensure that card_id is int 
-Validator::requireInt('card_id', $body['card_id']);
+
 
 // Cast each field into the correct PHP type for safety.
-$cardId =(int)$body['card_id'];
+$CardNumber =(string)$body['card_number'];
 $amount =(float)$body['Amount'];
 $product =(string)$body['product'];
 $idemkey= (string) $body['idempotency_key'];
 
+/**
+ * Resolve sender card using card number
+ * ------------------------------
+ * Converts card number into internal Card_ID.
+ * If the card number does not exist, stop immediately.
+ */
+$card_number = CardRepository::getIdByCardNumber($CardNumber);
+if(!$card_number){
+    Json::error(404, 'card number not found');
+}
+
 // This calls TransactionService::deposit(), which interacts with the DB.
-$result = TransactionService::deposit($cardId, $product, $idemkey, $amount );
+$result = TransactionService::deposit($card_number, $product, $idemkey, $amount );
 
 //Decide which HTTP status code to return, based on the result:
 //status comes from the database trigger (usually success)
 //return HTTP 201 Created
 if(($result['status'] ?? null) == 'success'){
-    Json::ok(201,$result);
+    Json::ok(201,[
+    'status'        =>  'success',
+    'amount'        =>  $result['amount'],
+    'card_number'   =>  mask::iban_mask($CardNumber),
+    'type'          =>  $result['type'],
+    'Balance_After' =>  $result['Balance_After'],
+    'Product'       =>  $result['Product'],
+    'created_at'    =>  $result['created_at'],
+]);
 }
 
 

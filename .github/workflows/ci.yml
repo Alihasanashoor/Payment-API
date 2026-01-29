@@ -80,7 +80,7 @@ jobs:
             payment_test < database/schema.sql
       - name: Start API
         run: |
-          php -S 127.0.0.1:8000 -t public > server.log 2>&1 &
+          php -S 127.0.0.1:8000 -t public > /dev/null 2>&1 &
       - name: Wait for API to be ready
         run: |
           for i in {1..15}; do
@@ -103,6 +103,6 @@ jobs:
           DB_USER: payuser
           DB_PASS: paypass
         run: |
-          pytest 
+          pytest
 
 

@@ -9,15 +9,15 @@ INVALID_AMOUNTS = [0 ,-1.00, -10.5]
 
 # Shared missing required fields for business-rule tests
 MISSING_REQUIRED_FIELDS = [
-        {"Amount":1.00, "product": "TEST", "idempotency_key": "missing-card_id"},
-        {"card_id": 932, "product": "TEST", "idempotency_key": "missing-amount"},
-        {"card_id": 932, "Amount": 1.00, "idempotency_key": "missing-product"},
-        {"card_id": 932, "Amount": 1.00, "product": "missing-idem"},
+        {"Amount":1.00, "product": "TEST", "idempotency_key": "missing-card_number"},
+        {"card_number": 932, "product": "TEST", "idempotency_key": "missing-amount"},
+        {"card_number": 932, "Amount": 1.00, "idempotency_key": "missing-product"},
+        {"card_number": 932, "Amount": 1.00, "product": "missing-idem"},
         ]
 
 
 @pytest.fixture
-def unique_email():
+def unique_email(): 
     """
     Generates a unique email for each test.
     - Uses a UUID to guarantee uniqueness across test runs

@@ -80,20 +80,23 @@ final class TransactionService{
                     // Return the previously recorded transaction instead of executing
                     return [
                         'idempotent'  => true,
-                        'transaction' => $existing,
+                        'transaction' => [  
+                            'status'         => 'success',
+                            'idempotent'     => true,
+                            'Transaction_ID' => $existing['Transaction_ID'],
+                            'type'           => $existing['type'],
+                            'Product'        => $existing['Product'],
+                            'amount'         => (float)$existing['Amount'],
+                            'Balance_After'  => (float)$existing['Balance_After'],
+                            'created_at'     => $existing['Created_At'],
+                        ],
                         'note'        => 'Same Idempotency_Key used; returning previous result.'
+
                     ];
                 }
                 // Start atomic transaction (everything succeeds or nothing
                 // telling MySQL: “I’m starting a transaction — don’t finalize changes until I say so.”
                 $pdo->beginTransaction();
-                // Serch for the card_id if not found return 404 status code
-                $card_check =$pdo->prepare('SELECT * FROM card WHERE Card_ID =? FOR UPDATE');
-                $card_check->execute([$cardId]);
-                $card = $card_check->fetch();
-                if(!$card){
-                    Json::error(404, 'Card not found');
-                }
 
                 //Insert a transaction row; triggers will set Balance_After + status and update card if success                
                 $insert=$pdo->prepare(' INSERT INTO `transaction`
@@ -111,16 +114,13 @@ final class TransactionService{
                 $pdo->commit();
 
                 return[
-                    'Transaction_ID'   =>$row['Transaction_ID'],
-                    'status'           =>$row['status'],
-                    'card_id'          =>(int)$row['Card_ID'],
-                    'type'             =>$row['type'],
-                    'Amount_taken'     =>(float)$row['Amount'],
-                    'Balance_After'    =>(float)$row['Balance_After'],
-                    'Product'          =>$row['Product'],
-                    'initiator_type'   =>$row['initiator_type'],
-                    'initiator_id'     =>$row['initiator_id'],
-                    'Idempotency_key'  =>$row['Idempotency_Key']
+                    'status'          => 'success',
+                    'Transaction_ID'  => $row['Transaction_ID'],
+                    'type'            => $row['type'],
+                    'Product'         => $row['Product'],
+                    'amount'          => (float)$row['Amount'],
+                    'Balance_After'   => (float)$row['Balance_After'],
+                    'created_at'      => $row['Created_At'],
                 ];
             } catch(Exception $e){
     
@@ -202,46 +202,45 @@ final class TransactionService{
                     // Return the previously recorded transaction instead of executing
                     return[
                         'idempotent'  => true,
-                        'transaction' => $existing,
+                        'transaction' => [  
+                            'status'         => 'success',
+                            'idempotent'     => true,
+                            'Transaction_ID' => $existing['Transaction_ID'],
+                            'type'           => $existing['type'],
+                            'Product'        => $existing['Product'],
+                            'amount'         => (float)$existing['Amount'],
+                            'Balance_After'  => (float)$existing['Balance_After'],
+                            'created_at'     => $existing['Created_At'],
+                        ],
                         'note'        => 'Same Idempotency_Key used; returning previous result.'
+                        
                     ];
                 }
                 // Start atomic transaction (everything succeeds or nothing
                 // telling MySQL: “I’m starting a transaction — don’t finalize changes until I say so.”
                 $pdo->beginTransaction();
-                // Serch for the card_id if not found return 404 status code
-                $card_check =$pdo->prepare('SELECT * FROM card WHERE Card_ID =? FOR UPDATE');
-                $card_check->execute([$cardId]);
-                $card = $card_check->fetch();
-                if(!$card){
-                    Json::error(404, 'Card not found');
-                }
                 
                 $insert=$pdo->prepare(' INSERT INTO `transaction`
                 (`Card_ID`, `Product`, `Amount`, `type`,`Idempotency_Key`, `payload_hash`)
                 VALUES (?, ?, ?, ?,?, ?)');
                 $insert->execute([$cardId, $product,$Amount_send,'deposit', $idemkey, $payloadHash]);
-
+                
+                
                 // Return the auto-increment ID of the last inserted row in this connection.
                 $autoID=(int)$pdo->lastInsertId();
                 // Query the row back
                 $get=$pdo->prepare('SELECT * FROM `transaction` WHERE `ID` = ?');
                 $get->execute([$autoID]);
                 $row=$get->fetch();
-
                 $pdo->commit();
-
                 return[
-                    'Transaction_ID'   =>$row['Transaction_ID'],
-                    'status'           =>$row['status'],
-                    'card_id'          =>(int)$row['Card_ID'],
-                    'type'             =>$row['type'],
-                    'Amount_taken'     =>(float)$row['Amount'],
-                    'Balance_After'    =>(float)$row['Balance_After'],
-                    'Product'          =>$row['Product'],
-                    'initiator_type'   =>$row['initiator_type'],
-                    'initiator_id'     =>$row['initiator_id'],
-                    'Idempotency_key'  =>$row['Idempotency_Key']
+                    'status'          => 'success',
+                    'Transaction_ID'  => $row['Transaction_ID'],
+                    'type'            => $row['type'],
+                    'Product'         => $row['Product'],
+                    'amount'          => (float)$row['Amount'],
+                    'Balance_After'   => (float)$row['Balance_After'],
+                    'created_at'      => $row['Created_At'],
                 ];
 
             } catch(Exception $e){
