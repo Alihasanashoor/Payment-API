@@ -23,7 +23,7 @@ if($linkId ==''){
 //Fetch student’s account + first card using the service layer, Service returns null if no row is found.
 $result= StudentService::getByLinkid($linkId);
 
-if ($result === null || empty($result['card_id'])) {
+if ($result === null) {
     // If account exists but no card, you can choose to 404, or auto-create a card.
     Json::error(404, 'not found for this link_id or no card for this account');
     exit;
