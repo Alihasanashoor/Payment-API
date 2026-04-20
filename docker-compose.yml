@@ -13,6 +13,7 @@ services:
     depends_on:
       - db
 
+
   
 
 
@@ -22,6 +23,23 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: payment_test
+      MYSQL_USER: payuser
+      MYSQL_PASSWORD: paypass
+      MYSQL_ROOT_PASSWORD: rootpass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+
+volumes:
+  mysql_data:
+
+  
+  db: 
+    image: mysql:8.0
+    container_name: payment_mysql_prod
+    restart: always
+    environment:
+      MYSQL_DATABASE: payment_prod
       MYSQL_USER: payuser
       MYSQL_PASSWORD: paypass
       MYSQL_ROOT_PASSWORD: rootpass
