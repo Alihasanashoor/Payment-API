@@ -55,7 +55,7 @@ final class Validator{
 
     public static function validateBalnce($balance){
         if(!is_numeric($balance) || $balance < 20){
-            Json::error(422,'Balance must be grater or equal then 20');
+            Json::error(422,'Balance must be grater or equal to 20');
         }
     }
 
