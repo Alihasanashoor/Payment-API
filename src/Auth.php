@@ -130,6 +130,8 @@ final class Auth{
     * @param int $apiKeyId
     */
     private static function enforceRateLimit(PDO $pdo, int $apikeyID){
+
+            
         /**
          * Compute the start of the current minute window.
          *

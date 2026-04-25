@@ -77,7 +77,7 @@ jobs:
           echo "MySQL container is: $MYSQL_CONTAINER"
 
           docker exec -i "$MYSQL_CONTAINER" \
-            mysql -u root -proot payment_test < database/schema.sql
+            mysql -u root -proot payment_test < database/schema.sql 
       - name: Start API
         run: |
           php -S 127.0.0.1:8000 -t public > /dev/null 2>&1 &

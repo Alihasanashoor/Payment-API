@@ -25,6 +25,8 @@ services:
       MYSQL_USER: payuser
       MYSQL_PASSWORD: paypass
       MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+     - "3306:3306"
     volumes:
       - mysql_test_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
