@@ -72,12 +72,7 @@ jobs:
           EOF
       - name: Initialize database schema
         run: |
-          MYSQL_CONTAINER=$(docker ps --filter "ancestor=mysql:8.0" --format "{{.ID}}" | head -n 1)
-
-          echo "MySQL container is: $MYSQL_CONTAINER"
-
-          docker exec -i "$MYSQL_CONTAINER" \
-            mysql -u root -proot payment_test < database/schema.sql 
+          mysql -h 127.0.0.1 -P 3306 -u root -proot payment_test < database/schema.sql
       - name: Start API
         run: |
           php -S 127.0.0.1:8000 -t public > /dev/null 2>&1 &
@@ -100,9 +95,9 @@ jobs:
           API_BASE_URL: http://127.0.0.1:8000
           DB_HOST: 127.0.0.1
           DB_NAME: payment_test
-          DB_USER: payuser
-          DB_PASS: paypass
+          DB_USER: root
+          DB_PASS: root
         run: |
-          pytest
+          pytest -v
 
 
